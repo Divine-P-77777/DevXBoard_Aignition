@@ -1,0 +1,86 @@
+📁 devxboard/
+│
+├── 📁 public/                              # Static assets
+│   ├── 📁 images/                          # All static images (UI, logos, etc.)
+│   ├── favicon.ico
+│   └── robots.txt
+│
+├── 📁 src/                                 # Main source directory
+│   ├── 📁 app/                             # App Router (Next.js)
+│   │   ├── 📁 auth/                        
+│   │   │   ├── 📄 page.js                  # Metadata + link to Auth.jsx
+│   │   │   ├── 📁 resetpassword/
+│   │   │   │   └── 📄 page.js              # Password reset UI
+│   │   │   ├── 📁 callback/
+│   │   │   │   └── 📄 page.js              # Supabase OAuth callback
+│   │   │   └── 📄 Auth.jsx                 # Login UI logic
+│   │   │
+│   │   ├── 📁 upload/                      # Code uploading page
+│   │   │   ├── 📄 page.js
+│   │   │   └── 📄 UploadPage.jsx
+│   │   │
+│   │   ├── 📁 url-store/                   # URL organizer
+│   │   │   ├── 📄 page.js
+│   │   │   └── 📄 UrlStorePage.jsx
+│   │   │
+│   │   ├── 📁 my-template/                 # User's private templates
+│   │   │   ├── 📄 page.js
+│   │   │   └── 📄 MyTemplatePage.jsx
+│   │   │
+│   │   ├── 📁 my-profile/                  # User profile and settings
+│   │   │   ├── 📄 page.js
+│   │   │   └── 📄 MyProfilePage.jsx
+│   │   │
+│   │   ├── 📁 community/                   # Publicly shared templates
+│   │   │   ├── 📄 page.js
+│   │   │   └── 📄 CommunityPage.jsx
+│   │   │
+│   │   ├── 📁 template/                    # Dynamic template detail page
+│   │   │   ├── 📁 [id]/
+│   │   │   │   ├── 📄 page.js
+│   │   │   │   └── 📄 TemplateDetail.jsx
+│   │   │
+│   │   ├── 📁 legal/                       # Legal content (SEO enabled)
+│   │   │   ├── 📄 terms.js
+│   │   │   └── 📄 privacy.js
+│   │   │
+│   │   └── 📄 layout.js                    # Global layout
+│
+│   ├── 📁 components/                      # Shared reusable components
+│   │   ├── 📁 ui/                          # Buttons, inputs, dropdowns
+│   │   │   ├── 📄 Button.jsx
+│   │   │   ├── 📄 Input.jsx
+│   │   │   └── ...
+│   │   │
+│   │   ├── 📁 store/                       # Global state stores (e.g., dark mode)
+│   │   │   └── 📄 themeStore.js
+│   │   │   └── 📄 store.js
+│   │   │
+│   │   └── 📁 constants/                   # Constant values, enums, filters
+│   │       └── 📄 index.js
+│
+│   ├── 📁 hooks/                           # Custom React hooks
+│   │   ├── 📄 useTheme.js
+│   │   ├── 📄 useAuth.js
+│   │   ├──        #Custom hook to call formatting/Clean via GPT
+│
+│   ├── 📁 lib/                             # Library config (e.g., Supabase)
+│   │   └── 📁 supabase/
+│   │   |    └── 📄 client.js                # Supabase client instance
+│   │   └──
+│   │                    
+│      
+│   ├── 📁 middleware/                      # Middlewares (auth guards, redirects)
+│   │   └── 📄 authMiddleware.js
+│
+│   ├── 📁 styles/                          # Global and tailwind styles
+│   │   ├── 📄 globals.css
+│   │   └── 📄 tailwind.config.js
+│
+│   └── 📄 layout.css                       # Optional: layout-specific styles
+│
+├── 📄 .env.local                           # Environment variables
+├── 📄 next.config.js                       # Next.js configuration
+├── 📄 jsconfig.json / tsconfig.json        # Path aliases, types
+├── 📄 package.json
+└── 📄 README.md
