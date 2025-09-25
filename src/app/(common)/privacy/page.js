@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React from "react";
 import { useSelector } from "react-redux";
@@ -6,92 +6,126 @@ import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 
 const PrivacyPolicy = () => {
-  const isDark = useSelector((state) => state.theme.isDarkMode);
+  const isDarkMode = useSelector((state) => state.theme.isDarkMode);
 
-  const bgClass = isDark ? "bg-slate-900 text-gray-100" : "bg-gray-50 text-gray-900";
-  const textClass = isDark ? "text-gray-100" : "text-gray-800";
+  const bgClass = isDarkMode
+    ? "bg-black text-gray-100"
+    : "bg-white text-gray-900";
+  const textClass = isDarkMode ? "text-gray-300" : "text-gray-700";
+  const borderColor = isDarkMode ? "border-gray-700" : "border-gray-300";
 
   return (
     <>
-    <Navbar/>
-    <div className={`${bgClass} pt-30 min-h-screen p-6`}>
-      <div className="max-w-4xl mx-auto space-y-6">
-        <motion.h1
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-2xl font-bold border-b pb-2"
-        >
-          Privacy Policy
-        </motion.h1>
+      <Navbar />
+      <div className={`${bgClass} min-h-screen pt-24 px-6`}>
+        <div className="max-w-4xl mx-auto space-y-8">
+          <motion.h1
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-purple-500 to-pink-500"
+          >
+            Privacy Policy
+          </motion.h1>
 
-        <p className="text-sm italic">Last updated: May 23, 2025</p>
+          <p className="text-sm italic">Last updated: June 19, 2025</p>
 
-        <motion.section
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="space-y-3"
-        >
-          <h2 className="text-xl font-bold">Introduction</h2>
-          <p className={`text-sm leading-relaxed ${textClass}`}>
-            Welcome to our developer platform. Your privacy is important to us. This policy outlines how we collect, use, and protect your data.
-          </p>
-        </motion.section>
+          <motion.section
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="space-y-4"
+          >
+            <h2 className="text-xl font-semibold text-purple-400">
+              Introduction
+            </h2>
+            <p className={`text-sm leading-relaxed ${textClass}`}>
+              Welcome to <strong>DevXBoard</strong>, a platform built for
+              developers to save, manage, and enhance web links. Your privacy
+              matters to us. This policy outlines what data we collect and how
+              we use it.
+            </p>
+          </motion.section>
 
-        <hr className="border-t my-4" />
+          <hr className={`${borderColor} border-t`} />
 
-        <section className="space-y-3">
-          <h2 className="text-xl font-bold">Information We Collect</h2>
-          <p className={`text-sm leading-relaxed ${textClass}`}>
-            We collect data you provide (like email, uploaded templates) and usage information (such as page visits and tool usage).
-          </p>
-        </section>
+          {[
+            {
+              title: "What Information We Collect",
+              content:
+                "We collect email addresses (via Supabase Auth), saved URLs, templates, and optionally, AI-generated metadata (titles, tags).",
+            },
+            {
+              title: "How We Use Your Information",
+              content:
+                "We use your data to manage your account, store saved links, generate metadata via GPT, and improve platform features.",
+            },
+            {
+              title: "Data Storage & Security",
+              content:
+                "All data is securely stored in Supabase. We use encryption, role-based access, and HTTPS to protect your information.",
+            },
+            {
+              title: "Public vs Private Content",
+              content:
+                "You can mark your saved links and templates as private or public. Private content is visible only to you.",
+            },
+            {
+              title: "AI-generated Content Notice",
+              content:
+                "DevXBoard uses OpenAI's GPT models to auto-generate metadata. AI output is stored in your account but can be edited or removed.",
+            },
+            {
+              title: "Cookies & Analytics",
+              content:
+                "We may use cookies or lightweight analytics to improve performance and understand usage trends. No marketing or tracking cookies are used.",
+            },
+            {
+              title: "User Rights & Choices",
+              content:
+                "You have the right to access, edit, or delete your data. For support, email us anytime at support@devxboard.app.",
+            },
+            {
+              title: "Third-party Services",
+              content:
+                "We use Supabase (authentication & database), OpenAI (AI generation), and Vercel (deployment). These providers handle data securely.",
+            },
+            {
+              title: "Changes to This Policy",
+              content:
+                "We may occasionally update this policy. We’ll notify you of major changes via in-app notices or email.",
+            },
+            {
+              title: "Contact Information",
+              content:
+                'Questions? Reach us at <a href="mailto:support@devxboard.app" class="underline text-pink-500">support@devxboard.app</a>',
+            },
+          ].map((section, i) => (
+            <section key={i} className="space-y-3">
+              <h2 className="text-xl font-semibold text-purple-400">
+                {section.title}
+              </h2>
+              <p
+                className={`text-sm leading-relaxed ${textClass}`}
+                dangerouslySetInnerHTML={{ __html: section.content }}
+              />
+            </section>
+          ))}
 
-        <section className="space-y-3">
-          <h2 className="text-xl font-bold">How We Use Your Information</h2>
-          <p className={`text-sm leading-relaxed ${textClass}`}>
-            Your data helps us improve our platform, personalize your experience, and communicate with you regarding updates and support.
-          </p>
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-xl font-bold">Sharing and Disclosure</h2>
-          <p className={`text-sm leading-relaxed ${textClass}`}>
-            We never sell your data. We may share it with trusted services to operate and enhance our platform.
-          </p>
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-xl font-bold">Cookies and Tracking Technologies</h2>
-          <p className={`text-sm leading-relaxed ${textClass}`}>
-            We use cookies to analyze traffic and personalize content. You can manage cookie preferences through your browser settings.
-          </p>
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-xl font-bold">Data Security</h2>
-          <p className={`text-sm leading-relaxed ${textClass}`}>
-            We implement industry-standard security measures to safeguard your data against unauthorized access.
-          </p>
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-xl font-bold">User Rights & Choices</h2>
-          <p className={`text-sm leading-relaxed ${textClass}`}>
-            You can request to view, edit, or delete your data. Contact us at <a className="text-blue-500 underline" href="mailto:support@yourdevplatform.com">support@yourdevplatform.com</a>.
-          </p>
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-xl font-bold">Contact Us</h2>
-          <p className={`text-sm leading-relaxed ${textClass}`}>
-            For questions about this policy, reach out at <a className="text-blue-500 underline" href="mailto:support@yourdevplatform.com">support@yourdevplatform.com</a>.
-          </p>
-        </section>
+          <div className="text-center mt-10">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              className="px-6 py-2 rounded-lg text-sm font-medium bg-gradient-to-br from-purple-500 to-pink-500 text-white shadow-md hover:opacity-90 transition"
+            >
+              Back to Top
+            </motion.button>
+          </div>
+        </div>
       </div>
-    </div>
+ 
     </>
   );
 };

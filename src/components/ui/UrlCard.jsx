@@ -1,49 +1,85 @@
 import Link from "next/link";
 import { useSelector } from "react-redux";
 import clsx from "clsx";
+import { getFaviconFromUrl } from "@/utils/getFaviconFromUrl";
+import { ExternalLink, Trash2 } from "lucide-react";
+import { useState } from "react";
 
-const UrlCard = ({ card, previewImages, onDelete }) => {
+const UrlCard = ({ card, onDelete }) => {
   const isDark = useSelector((state) => state.theme.isDarkMode);
+  const isValidUrl = typeof card?.url === "string" && card.url.trim() !== "";
+  const [faviconError, setFaviconError] = useState(false);
 
   return (
     <div
       className={clsx(
-        "flex items-center justify-between rounded-xl p-4 shadow-md transition",
+        "flex flex-wrap sm:flex-nowrap items-center justify-between rounded-2xl p-4 shadow-xl backdrop-blur-md transition-all duration-300 border w-full gap-4 sm:gap-6",
         isDark
-          ? "bg-gradient-to-br from-zinc-900 to-zinc-800 border border-cyan-700 text-white"
-          : "bg-gradient-to-br from-cyan-50 to-blue-100 border border-cyan-300 text-black"
+          ? "bg-black border-purple-800 text-pink-100"
+          : "bg-[rgba(255,240,255,0.4)] border-pink-300 text-black"
       )}
     >
-      <div className="flex items-center gap-4">
-        {previewImages[card.url] && (
-          <img
-            src={previewImages[card.url]}
-            alt="Preview"
-            width={60}
-            height={60}
-            className="rounded border shadow-sm"
-          />
-        )}
-
-        <div className="flex flex-col">
-          <span className="font-semibold line-clamp-1">{card.title}</span>
-          <span className="text-xs mt-1 text-gray-400">{card.tags}</span>
+      {/* Left Content */}
+      <div className="flex items-center gap-4 w-full sm:w-auto">
+        <img
+          src={
+            !faviconError && isValidUrl
+              ? getFaviconFromUrl(card.url)
+              : "/default-favicon.png"
+          }
+          onError={() => setFaviconError(true)}
+          alt="Site Icon"
+          className="w-10 h-10 rounded-full border border-pink-200 shadow object-cover"
+        />
+        <div className="flex flex-col max-w-full">
+          <span className="font-semibold text-sm sm:text-base break-words">
+            {card.title || "Untitled"}
+          </span>
+          <span className="text-xs sm:text-sm mt-1">
+            {card.tags || "No Tags"}
+          </span>
         </div>
       </div>
 
-      <div className="flex items-center gap-6">
-        <Link
-          href={card.url}
-          target="_blank"
-          className="text-sm font-medium text-blue-400 hover:underline break-all"
-        >
-          Visit
-        </Link>
+      {/* Right Action Buttons */}
+      <div className="flex items-center gap-4 ml-auto">
+        {isValidUrl ? (
+          <Link
+            href={card.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Visit"
+            className={clsx(
+              "hover:scale-110 transition text-black",
+              isDark && "text-pink-300 hover:text-pink-200",
+              !isDark && "hover:text-purple-900"
+            )}
+          >
+            <ExternalLink size={20} />
+          </Link>
+        ) : (
+          <span
+            title="No valid URL"
+            className={clsx(
+              "text-gray-400 cursor-not-allowed",
+              isDark ? "text-pink-300/50" : "text-black/40"
+            )}
+          >
+            <ExternalLink size={20} />
+          </span>
+        )}
+
         <button
           onClick={() => onDelete(card.id)}
-          className="text-sm font-medium text-red-400 hover:underline"
+          title="Delete"
+          className={clsx(
+            "transition hover:scale-110",
+            isDark
+              ? "text-red-300 hover:text-red-200"
+              : "text-black hover:text-pink-900 font-bold"
+          )}
         >
-          Delete
+          <Trash2 size={20} />
         </button>
       </div>
     </div>

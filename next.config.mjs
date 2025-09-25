@@ -31,6 +31,14 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'i.pinimg.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'png.pngtree.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'plus.unsplash.com',
+      },
     ],
   },
   reactStrictMode: true,

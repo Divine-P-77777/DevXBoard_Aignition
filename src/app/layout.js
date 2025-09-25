@@ -30,16 +30,16 @@ export default function RootLayout({ children }) {
         {/* Open Graph Meta */}
         <meta property="og:title" content="DevXBoard — Developer Resource Hub" />
         <meta property="og:description" content="Your central place to manage and share developer resources." />
-        <meta property="og:image" content="https://cdn-icons-png.flaticon.com/512/5220/5220478.png" />
+        <meta property="og:image" content="/favicon.png" />
         <meta property="og:url" content="https://devxboard.vercel.app" />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="DevXBoard" />
 
         {/* Twitter Card */}
-        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:card" content="/favicon.png" />
         <meta name="twitter:title" content="DevXBoard" />
         <meta name="twitter:description" content="Manage & share your dev tools and templates." />
-        <meta name="twitter:image" content="https://devxboard.vercel.app/og-image.png" />
+        <meta name="twitter:image" content="https://devxboard.vercel.app/favicon.png" />
         <meta name="twitter:creator" content="@yourtwitterhandle" />
 
         {/* Favicon */}
@@ -49,7 +49,7 @@ export default function RootLayout({ children }) {
         <title>DevXBoard — Developer Resource Hub</title>
       </head>
 
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen `}>
         <Provider>
           <Navbar />
           <main className="flex-1">{children}</main>

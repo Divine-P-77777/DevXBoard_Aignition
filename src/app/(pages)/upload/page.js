@@ -9,7 +9,7 @@ import { X } from 'lucide-react'
 import Editor from '@monaco-editor/react'
 import CloudinaryUploader from '@/libs/Cloudinary'
 import supabase from '@/libs/supabase/client'
-import ConfirmPopup from '@/components/ui/popup'
+import ConfirmPopup from '@/components/ui/Popup'
 import Navbar from "@/components/Navbar";
 
 const mostUsedLanguages = [
