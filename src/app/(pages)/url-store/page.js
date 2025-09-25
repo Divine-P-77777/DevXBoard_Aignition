@@ -12,7 +12,6 @@ import UrlCardGroup from "@/components/ui/UrlCardGroup";
 import clsx from "clsx";
 import GlobalLoader from "@/components/ui/GlobalLoader";
 import { toast, Bounce } from 'react-toastify';
-import ToastContainer from "@/components/ui/ToastContainer";
 
 const DEFAULT_URL = { url: "", title: "", tag: "" };
 
@@ -126,6 +125,7 @@ const Page = () => {
   }, [reset]);
 
   const isUrlValid = url => /^https?:\/\/./.test(url);
+  
   const autoGenerateTitleTag = useCallback(async (index, url) => {
     if (!isUrlValid(url)) return;
     setLoadingIndexes(prev => ({ ...prev, [index]: true }));
@@ -199,7 +199,6 @@ const Page = () => {
 
   return (
     <>
-      <ToastContainer />
       {error && (<div className="toast fixed top-4 left-1/2 -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded shadow z-50">{error}</div>)}
       <div className={clsx("min-h-screen", isDarkMode ? "bg-gradient-to-br from-black via-gray-900 to-black text-gray-300" : "bg-gradient-to-br from-purple-300 via-white to-pink-300 text-gray-900")}>
         <ConfirmPopup visible={!!confirmId} onCancel={() => setConfirmId(null)} onConfirm={() => handleDeleteCard(confirmId)} />
