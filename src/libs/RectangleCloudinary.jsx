@@ -1,18 +1,23 @@
 "use client";
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { waveform } from "ldrs";
 
 waveform.register();
 
-const RectangleCloudinary = ({ onUpload }) => {
-  const [preview, setPreview] = useState(null);
+const RectangleCloudinary = ({ onUpload, initialUrl }) => {
+  const [preview, setPreview] = useState(initialUrl || null);
   const [loading, setLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef(null);
 
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
   const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+
+  // To handle prop updates (when switching between edit/create)
+  useEffect(() => {
+    setPreview(initialUrl || null);
+  }, [initialUrl]);
 
   const handleUpload = async (file) => {
     if (!file) return;

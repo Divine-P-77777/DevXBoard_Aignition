@@ -23,6 +23,7 @@ export default function CodePromptPopup({ visible, onClose, onGenerate, descript
     }
     onGenerate(prompt);
     setPrompt("");
+    onClose();
   };
 
   if (!visible) return null;

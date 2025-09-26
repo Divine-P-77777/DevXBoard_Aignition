@@ -12,7 +12,9 @@ import {
   MessageCircle,
   Bookmark,
   X,
+  Eye
 } from "lucide-react";
+import Link from "next/link";
 
 export default function CommunityTemplates() {
   const [templates, setTemplates] = useState([]);
@@ -353,6 +355,17 @@ export default function CommunityTemplates() {
                   >
                     <Bookmark size={18} /> {t.saved ? "Saved" : "Save"}
                   </button>
+                  <Link href={`/template/view/${t.id}`}>
+                  <button
+                    onClick={() => handleSave(t.id)}
+                    className={clsx(
+                      "flex items-center gap-1",
+                      t.saved ? "text-yellow-500" : "hover:text-yellow-500"
+                    )}
+                  >
+                    <Eye size={18} /> <span>Explore</span>
+                  </button>
+                  </Link>
                 </div>
               </div>
             ))}
