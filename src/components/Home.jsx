@@ -1,14 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Lottie from 'lottie-react';
 import { Database, Code, Users, Settings } from 'lucide-react';
-// import your Lottie JSONs here
-// import heroAnimation from '@/public/lottie/hero.json';
+
 
 export default function Home() {
   const isDark = useSelector((state) => state.theme.isDarkMode);

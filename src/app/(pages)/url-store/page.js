@@ -10,10 +10,9 @@ import ConfirmPopup from "@/components/ui/Popup";
 import UrlFormField from "@/components/ui/UrlFormField";
 import UrlCardGroup from "@/components/ui/UrlCardGroup";
 import clsx from "clsx";
-import GlobalLoader from "@/components/ui/GlobalLoader";
 import { toast, Bounce } from 'react-toastify';
 import { useRouter } from "next/navigation";
-
+import {Loader2} from "lucide-react"
 
 const DEFAULT_URL = { url: "", title: "", tag: "" };
 
@@ -363,7 +362,7 @@ const Page = () => {
           {/* Card Grid or Loader */}
           <div className="mt-12 min-h-[200px] flex justify-center">
             {loading ? (
-              <div className="mx-auto"><GlobalLoader /></div>
+              <div className="mx-auto"><Loader2 color="purple" className="animate-spin w-12 h-12" /></div>
             ) : cards.length === 0 ? (
               <div className={clsx("text-center mx-auto", isDarkMode ? 'text-purple-200' : 'text-purple-900')}>
                 <p className="text-lg">No cards found.</p>
