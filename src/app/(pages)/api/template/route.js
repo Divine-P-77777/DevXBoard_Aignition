@@ -4,11 +4,17 @@ import { supabaseServer } from "@/libs/supabase/server";
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { title, subtitle, visibility, cover_image, blocks } = body;
+    const { title, subtitle, visibility, cover_image, blocks  , user_id} = body;
 
     if (!title || !cover_image || !blocks || blocks.length === 0) {
       return NextResponse.json(
         { success: false, error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+    if(!user_id){
+      return NextResponse.json(
+        { success: false, error: "Missing user_id" },
         { status: 400 }
       );
     }
@@ -19,7 +25,7 @@ export async function POST(req) {
     const { data: template, error: templateError } = await supabase
       .from("templates")
       .insert({
-        user_id: body.user_id ?? null, // optionally pass user_id from client
+        user_id,
         title,
         subtitle,
         visibility,

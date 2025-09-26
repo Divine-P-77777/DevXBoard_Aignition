@@ -1,26 +1,40 @@
 "use client";
 import React from "react";
-import { Pinwheel } from 'ldrs/react'
-import 'ldrs/react/Pinwheel.css'
+import { Pinwheel } from 'ldrs/react';
+import 'ldrs/react/Pinwheel.css';
+import { useSelector } from "react-redux";
+import clsx from "clsx";
 
 const GlobalLoader = ({
-  size = 50,
+  size,       // optional: number or string
   stroke = 4,
   color = "purple",
   fullscreen = false,
   className = "",
 }) => {
+  const isDarkMode = useSelector((state) => state.theme.isDarkMode);
+
+  // responsive size fallback
+  const loaderSize = size || 50;
+
   return (
     <div
-      className={`${fullscreen ? "fixed inset-0 z-50 bg-black/30 flex items-center justify-center" : "flex items-center justify-center"} ${className}`}
+      className={clsx(
+        fullscreen 
+          ? "fixed inset-0 z-50 flex items-center justify-center transition-colors duration-300" 
+          : "flex items-center justify-center",
+        fullscreen && (isDarkMode ? "bg-black/40" : "bg-white/30"),
+        className
+      )}
     >
-      <Pinwheel size={size} stroke={stroke} speed="1" color={color}></Pinwheel>
+      <Pinwheel
+        size={loaderSize}
+        stroke={stroke}
+        speed="1"
+        color={color}
+      />
     </div>
   );
 };
 
 export default GlobalLoader;
-
-
-
-

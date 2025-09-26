@@ -256,6 +256,7 @@ export default function UploadTemplatePage() {
 
     try {
       const payload = {
+        user_id: user.id,
         title,
         subtitle,
         visibility,
@@ -322,18 +323,10 @@ export default function UploadTemplatePage() {
           className={`max-w-5xl mx-auto pt-30 p-6 space-y-6 
           ${isDarkMode ? "bg-gray-950 text-gray-100" : "bg-gray-50 text-gray-900"}`}
         >
-          <ConfirmPopup
-            visible={showConfirm}
-            onConfirm={confirmSubmit}
-            onCancel={() => setShowConfirm(false)}
-            title="Submit Template"
-            message="Are you sure you want to submit this template?"
-            confirmText="Submit"
-            cancelText="Cancel"
-          />
+    
 
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            🚀 Submit a Template <Sparkles className="text-yellow-500" />
+             Submit a Template <Sparkles className="text-yellow-500" />
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             Share your code snippets & templates with the community.  
@@ -459,7 +452,17 @@ export default function UploadTemplatePage() {
                 "Submit Template"
               )}
             </button>
+            
           </div>
+                <ConfirmPopup
+            visible={showConfirm}
+            onConfirm={confirmSubmit}
+            onCancel={() => setShowConfirm(false)}
+            title="Submit Template"
+            message="Are you sure you want to submit this template?"
+            confirmText="Submit"
+            cancelText="Cancel"
+          />
         </div>
       </div>
     </>

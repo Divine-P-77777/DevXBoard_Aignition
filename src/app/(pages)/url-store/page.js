@@ -12,6 +12,8 @@ import UrlCardGroup from "@/components/ui/UrlCardGroup";
 import clsx from "clsx";
 import GlobalLoader from "@/components/ui/GlobalLoader";
 import { toast, Bounce } from 'react-toastify';
+import { useRouter } from "next/navigation";
+
 
 const DEFAULT_URL = { url: "", title: "", tag: "" };
 
@@ -28,6 +30,16 @@ const Page = () => {
   const [loading, setLoading] = useState(false);
   const [bgFileName, setBgFileName] = useState("");
   const [error, setError] = useState('');
+
+  const router = useRouter();
+
+  // Auth check
+  useEffect(() => {
+    if (!user) {
+      toast.error("⚠️ Please login to continue", { transition: Bounce });
+      router.push("/auth");
+    }
+  }, [user, router]);
 
   const {
     register, handleSubmit, reset, setValue, getValues, control, watch
@@ -125,7 +137,7 @@ const Page = () => {
   }, [reset]);
 
   const isUrlValid = url => /^https?:\/\/./.test(url);
-  
+
   const autoGenerateTitleTag = useCallback(async (index, url) => {
     if (!isUrlValid(url)) return;
     setLoadingIndexes(prev => ({ ...prev, [index]: true }));
