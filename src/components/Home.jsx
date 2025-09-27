@@ -1,11 +1,12 @@
+
 'use client';
 
 import { useSelector } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import Lottie from 'lottie-react';
 import { Database, Code, Users, Settings } from 'lucide-react';
+import Image from 'next/image';
 
 
 export default function Home() {
@@ -15,27 +16,27 @@ export default function Home() {
   const features = [
     {
       title: 'Multi-card URL System',
-      description: 'Create unlimited cards of URLs with private/public options, profile pics, and custom backgrounds.',
+      description: 'Create unlimited cards with private/public options, profile pics, and custom backgrounds.',
       icon: Database,
-      color: 'text-blue-500',
+      color: 'text-blue-400',
     },
     {
       title: 'AI-Generated Metadata',
       description: 'Auto-generate titles, hashtags, and summaries for your URLs and code blogs using AI.',
       icon: Code,
-      color: 'text-purple-500',
+      color: 'text-purple-400',
     },
     {
       title: 'Community Sharing',
-      description: 'Discover public cards and templates shared by the community to get inspired.',
+      description: 'Discover public cards and templates shared by the community for inspiration.',
       icon: Users,
-      color: 'text-pink-500',
+      color: 'text-pink-400',
     },
     {
       title: 'Full Customization',
       description: 'Customize backgrounds, avatars, and themes to make your cards truly yours.',
       icon: Settings,
-      color: 'text-green-500',
+      color: 'text-green-400',
     },
   ];
 
@@ -44,161 +45,180 @@ export default function Home() {
       title: 'Create Cards',
       description: 'Set up multiple URL cards with profile pictures and backgrounds.',
       icon: Database,
-      color: 'text-blue-500',
+      color: 'text-blue-400',
     },
     {
       title: 'Generate Metadata',
       description: 'AI helps generate titles, hashtags, and summaries automatically.',
       icon: Code,
-      color: 'text-purple-500',
+      color: 'text-purple-400',
     },
     {
       title: 'Share & Explore',
       description: 'Make your cards public or explore community templates for inspiration.',
       icon: Users,
-      color: 'text-pink-500',
+      color: 'text-pink-400',
     },
   ];
 
   return (
-    <div className={`${isDark ? 'bg-black text-white' : 'bg-gradient-to-br from-blue-50 via-purple-50 to-white text-gray-900'}`}>
+    <div className={`relative overflow-hidden min-h-screen ${isDark ? 'bg-black text-white' : 'bg-white text-gray-900'}`}>
+      {/* Animated Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 animate-pulse" />
+      <div className="absolute top-1/3 left-1/2 w-[600px] h-[600px] bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full blur-3xl animate-spin-slow" />
 
-      {/* Section 1: Hero */}
-      <section className="max-w-7xl mx-auto px-6 py-32 flex flex-col-reverse md:flex-row items-center gap-10">
-        <motion.div
-          className="flex-1"
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8 }}
+      <main className="relative z-10">
+        {/* Hero Section */}
+        <section className="max-w-7xl mx-auto px-6 py-24 flex flex-col-reverse md:flex-row items-center gap-12">
+          <motion.div
+            className="flex-1"
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <h1 className="font-extrabold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-500 text-[clamp(2rem,5vw,4rem)] leading-tight">
+              AI Copilot for Developers & Creators
+            </h1>
+            <p className="text-base sm:text-lg md:text-xl mb-8 opacity-80 leading-relaxed max-w-xl">
+              Build multiple cards, auto-generate metadata, share code, and explore public templates — all automated for you.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+              <Link 
+                href="/upload"
+                className="px-6 py-3 text-center font-semibold rounded-lg text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-[0_0_20px_rgba(99,102,241,0.6)] transition w-full sm:w-auto"
+              >
+                Get Started Free
+              </Link>
+              <button
+                onClick={() => router.push('/community')}
+                className="px-6 py-3 font-semibold rounded-lg border border-blue-500 text-blue-500 hover:bg-blue-600 hover:text-white transition w-full sm:w-auto"
+              >
+                Explore Community
+              </button>
+            </div>
+          </motion.div>
+
+          <motion.div
+            className="flex-1 w-full max-w-lg"
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <div className="relative rounded-3xl aspect-[3/4] w-full   shadow-xl overflow-hidden">
+              <Image
+                src="/home.png"
+                alt="Home"
+                fill
+                className="rounded-3xl "
+                priority
+              />
+            </div>
+          </motion.div>
+        </section>
+
+        {/* Features Section */}
+        <section className="max-w-7xl mx-auto px-6 py-20">
+          <h2 className="text-4xl font-bold text-center mb-12">⚡ Powerful AI Features</h2>
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {features.map((f, idx) => (
+              <motion.div
+                key={idx}
+                className={`p-6 rounded-2xl backdrop-blur-lg border ${isDark ? 'border-purple-500/30 bg-black/50' : 'bg-white/70 border-gray-200'} shadow-lg hover:scale-105 hover:shadow-[0_0_25px_rgba(168,85,247,0.4)] transition`}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: idx * 0.1 }}
+              >
+                <f.icon size={40} className={`mb-4 ${f.color} animate-pulse`} />
+                <h3 className="text-lg sm:text-xl font-semibold mb-2">{f.title}</h3>
+                <p className="text-sm opacity-80">{f.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
+        {/* How It Works */}
+        <section
+          className="max-w-6xl mx-auto px-6 py-20 rounded-2xl my-16"
+          style={{
+            background: isDark
+              ? 'linear-gradient(135deg, #1a1a1a, #3c096c)'
+              : 'linear-gradient(135deg, #e0f2ff, #f3e8ff)',
+          }}
         >
-          <h1 className={`text-5xl md:text-6xl font-extrabold mb-6 ${isDark ? 'text-white' : 'text-blue-900'}`}>
-            AI Copilot for Developers & Creators
-          </h1>
-          <p className="text-lg md:text-xl mb-8 opacity-80 leading-relaxed">
-            Build multiple personal cards, auto-generate metadata, share code, and explore public templates — all in one platform.
+          <h2 className="text-4xl font-bold text-center mb-12">🚀 How It Works</h2>
+          <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-3">
+            {howItWorks.map((step, idx) => (
+              <motion.div
+                key={idx}
+                className="p-6 rounded-xl shadow-md text-center hover:scale-105 transition"
+                style={{ backgroundColor: isDark ? '#111' : '#fff' }}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: idx * 0.1 }}
+              >
+                <step.icon size={42} className={`mx-auto mb-4 ${step.color} animate-pulse`} />
+                <h3 className="font-bold text-lg mb-2">{step.title}</h3>
+                <p className="text-sm opacity-80">{step.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
+        {/* Community Showcase */}
+        <section className="max-w-7xl mx-auto px-6 py-20">
+          <h2 className="text-4xl font-bold text-center mb-12">🌐 Community Showcase</h2>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {[...Array(6)].map((_, idx) => (
+              <motion.div
+                key={idx}
+                className={`p-5 rounded-xl shadow-md hover:shadow-lg transition hover:scale-105 ${isDark ? 'bg-gray-900 border border-gray-700' : 'bg-white border border-gray-200'}`}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: idx * 0.1 }}
+              >
+                <div className="h-40 bg-gradient-to-r from-blue-300 to-purple-300 dark:from-gray-700 dark:to-gray-800 rounded-md mb-4 flex items-center justify-center text-white font-semibold">
+                  Template Preview
+                </div>
+                <h3 className="font-semibold mb-1">Template Title</h3>
+                <p className="text-xs opacity-70 mb-2">By Username</p>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs opacity-50">Blocks: 5</span>
+                  <button className="px-3 py-1 text-xs rounded bg-blue-600 text-white hover:bg-blue-700 transition">
+                    View
+                  </button>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="max-w-7xl mx-auto px-6 py-20 text-center">
+          <h2 className="text-4xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-500">
+            Your Privacy, Your Control
+          </h2>
+          <p className="mb-8 opacity-80 leading-relaxed max-w-2xl mx-auto">
+            Keep some cards private, share others publicly — you control everything with ease.
           </p>
-          <div className="flex flex-wrap gap-4">
+          <div className="flex justify-center gap-4 flex-wrap">
             <Link 
               href="/upload"
-              className="px-6 py-3 font-semibold rounded-lg text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:scale-105 transition-transform shadow-lg"
+              className="px-8 py-3 font-semibold rounded-lg text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-[0_0_20px_rgba(99,102,241,0.7)] transition"
             >
-              Get Started Free
+              Start Creating
             </Link>
-            <button
-              onClick={() => router.push('/community')}
-              className="px-6 py-3 font-semibold rounded-lg border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition"
+            <Link
+              href="/community"
+              className="px-8 py-3 font-semibold rounded-lg border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition"
             >
               Explore Community
-            </button>
+            </Link>
           </div>
-        </motion.div>
-
-        <motion.div
-          className="flex-1 w-full max-w-lg"
-          initial={{ opacity: 0, x: 50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          {/* Lottie Placeholder */}
-          {/* <Lottie animationData={heroAnimation} loop={true} /> */}
-          <div className="w-full h-80 bg-gray-200 dark:bg-gray-800 rounded-xl flex items-center justify-center text-gray-400">
-            Dashboard / Lottie Animation
-          </div>
-        </motion.div>
-      </section>
-
-      {/* Section 2: Features */}
-      <section className="max-w-7xl mx-auto px-6 py-20">
-        <h2 className="text-4xl font-bold text-center mb-12">Powerful Features</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {features.map((f, idx) => (
-            <motion.div
-              key={idx}
-              className={`p-6 rounded-xl shadow-md hover:shadow-lg transition hover:scale-105 ${isDark ? 'bg-gradient-to-br from-purple-900 to-black border border-pink-500' : 'bg-white border border-gray-200'}`}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: idx * 0.1 }}
-            >
-              <f.icon size={32} className={`mb-4 ${f.color}`} />
-              <h3 className="text-xl font-semibold mb-2">{f.title}</h3>
-              <p className="text-sm opacity-80">{f.description}</p>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      {/* Section 3: How It Works */}
-      <section className="max-w-5xl mx-auto px-6 py-20 rounded-xl my-16" style={{ background: isDark ? 'linear-gradient(135deg, #1a1a1a, #3c096c)' : 'linear-gradient(135deg, #e0f2ff, #f3e8ff)' }}>
-        <h2 className="text-4xl font-bold text-center mb-12">How It Works</h2>
-        <div className="grid md:grid-cols-3 gap-8">
-          {howItWorks.map((step, idx) => (
-            <motion.div
-              key={idx}
-              className="p-6 rounded-xl shadow-md text-center hover:scale-105 transition"
-              style={{ backgroundColor: isDark ? '#111' : '#fff' }}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: idx * 0.1 }}
-            >
-              <step.icon size={40} className={`mx-auto mb-4 ${step.color}`} />
-              <h3 className="font-bold mb-2">{step.title}</h3>
-              <p className="text-sm opacity-80">{step.description}</p>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      {/* Section 4: Community Showcase */}
-      <section className="max-w-7xl mx-auto px-6 py-20">
-        <h2 className="text-4xl font-bold text-center mb-12">Community Showcase</h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, idx) => (
-            <motion.div
-              key={idx}
-              className={`p-5 rounded-xl shadow-md hover:shadow-lg transition hover:scale-105 ${isDark ? 'bg-gray-900 border border-gray-700' : 'bg-white border border-gray-200'}`}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: idx * 0.1 }}
-            >
-              <div className="h-40 bg-gray-300 dark:bg-gray-700 rounded-md mb-4 flex items-center justify-center">
-                Template Preview
-              </div>
-              <h3 className="font-semibold mb-1">Template Title</h3>
-              <p className="text-xs opacity-70 mb-2">By Username</p>
-              <div className="flex justify-between items-center">
-                <span className="text-xs opacity-50">Blocks: 5</span>
-                <button className="px-3 py-1 text-xs rounded bg-blue-600 text-white hover:bg-blue-700 transition">View</button>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      {/* Section 5: CTA / Privacy */}
-      <section className="max-w-7xl mx-auto px-6 py-20 text-center">
-        <h2 className="text-4xl font-bold mb-6">Your Privacy, Your Control</h2>
-        <p className="mb-8 opacity-80 leading-relaxed">
-          Keep some cards private, share others publicly — you control everything with ease.
-        </p>
-        <div className="flex justify-center gap-4 flex-wrap">
-          <Link 
-            href="/upload"
-            className="px-8 py-3 font-semibold rounded-lg text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:scale-105 transition-transform shadow-lg"
-          >
-            Start Creating
-          </Link>
-          <Link
-            href="/community"
-            className="px-8 py-3 font-semibold rounded-lg border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition"
-          >
-            Explore Community
-          </Link>
-        </div>
-      </section>
-
+        </section>
+      </main>
     </div>
   );
 }

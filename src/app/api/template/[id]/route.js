@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseServer } from "@/libs/supabase/server";
 
 export async function GET(req, { params }) {
-  const { id } = await params; // template.id from URL
+  const { id } = await  params; // template.id from URL
   const searchParams = req.nextUrl.searchParams;
   const login_user_id = searchParams.get("userID"); // logged-in user id
 
@@ -16,16 +16,16 @@ export async function GET(req, { params }) {
   try {
     const supabase = supabaseServer();
 
-    // 1️⃣ Fetch template by template.id
+    // 1️⃣ Fetch template + code blocks
     const { data: template, error: templateError } = await supabase
       .from("templates")
-      .select("*")
+      .select("*, template_code_blocks(*)")
       .eq("id", id)
       .single();
 
-    if (templateError) {
+    if (templateError || !template) {
       return NextResponse.json(
-        { success: false, error: templateError.message },
+        { success: false, error: templateError?.message || "Template not found" },
         { status: 500 }
       );
     }
@@ -58,7 +58,7 @@ export async function GET(req, { params }) {
       viewer_id: login_user_id || null,
     });
 
-    // 5️⃣ Return formatted response
+    // 5️⃣ Return formatted response including code blocks
     return NextResponse.json(
       {
         success: true,

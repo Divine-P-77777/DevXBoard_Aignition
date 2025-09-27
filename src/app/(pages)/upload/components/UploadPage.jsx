@@ -45,26 +45,34 @@ export default function UploadPage() {
   };
 
   const handleToggleVisibility = async (tpl) => {
-    const newVisibility = tpl.visibility === "public" ? "private" : "public";
-    try {
-      await fetch(`/api/template/${tpl.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ visibility: newVisibility }),
-      });
-      setTemplates((prev) =>
-        prev.map((t) =>
-          t.id === tpl.id ? { ...t, visibility: newVisibility } : t
-        )
-      );
-      toast.success(
-        `Visibility set to ${newVisibility}`,
-        { transition: Bounce, theme: isDarkMode ? "dark" : "light" },
-      );
-    } catch {
-      toast.error("Failed to update visibility", { theme: isDarkMode ? "dark" : "light" });
-    }
-  };
+  const newVisibility = tpl.visibility === "public" ? "private" : "public";
+  try {
+    await fetch("/api/template", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        template_id: tpl.id,
+        user_id: user.id,
+        title: tpl.title,
+        subtitle: tpl.subtitle,
+        visibility: newVisibility,
+        cover_image: tpl.cover_image,
+        blocks: tpl.blocks,
+      }),
+    });
+    setTemplates((prev) =>
+      prev.map((t) =>
+        t.id === tpl.id ? { ...t, visibility: newVisibility } : t
+      )
+    );
+    toast.success(
+      `Visibility set to ${newVisibility}`,
+      { transition: Bounce, theme: isDarkMode ? "dark" : "light" },
+    );
+  } catch {
+    toast.error("Failed to update visibility", { theme: isDarkMode ? "dark" : "light" });
+  }
+};
 
   const handleEdit = (tpl) => {
     setEditTemplate(tpl);

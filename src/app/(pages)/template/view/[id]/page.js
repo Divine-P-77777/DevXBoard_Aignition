@@ -157,7 +157,7 @@ const [scrollProgress, setScrollProgress] = useState(0);
 
   // --- Layout: Custom Navbar & Floated Footer ---
   return (
-    <div className={`min-h-[1000px] flex flex-col ${styles.bgBase}`}>
+    <div className={`min-h-[1000px] pb-20 pt-20 flex flex-col ${styles.bgBase}`}>
       {/* Custom Navbar */}
       <nav
         className={`fixed top-0 left-0 right-0 flex items-center px-4 py-3
@@ -289,39 +289,73 @@ const [scrollProgress, setScrollProgress] = useState(0);
 
         {/* Code Blocks */}
         <div className="space-y-10 mt-8 px-2 md:px-0">
-          {filteredBlocks.length === 0 ? (
-            <div className={`text-center ${styles.textSecondary}`}>No blocks found.</div>
-          ) : (
-            filteredBlocks.map((block, idx) => (
-              <div
-                key={block.id || idx}
-                className={`rounded-xl border ${styles.borderCard} ${styles.bgCard} p-6 shadow-sm`}
-              >
-                {block.description && (
-                  <div className={`mb-4 text-md md:text-lg font-semibold break-words ${styles.blockDesc}`}>
-                    {block.description}
-                  </div>
-                )}
-                {block.code && (
-                  <div className="relative group">
-                    <pre
-                      className={`${styles.preBg} ${styles.preText} p-4 rounded-lg text-sm md:text-base overflow-x-auto`}
-                      style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
-                    >
-                      {block.code}
-                    </pre>
-                    <button
-                      className="absolute top-3 right-3 opacity-80 group-hover:opacity-100 bg-gray-700 dark:bg-gray-900 text-white p-2 rounded-lg hover:bg-indigo-600 dark:hover:bg-indigo-700 transition"
-                      onClick={() => handleCopy(block.code)}
-                      aria-label="Copy code"
-                    >
-                      <Copy size={16} />
-                    </button>
-                  </div>
-                )}
-              </div>
-            ))
-          )}
+        {filteredBlocks.map((block, idx) => (
+  <div
+    key={block.id || idx}
+    className={`rounded-xl border ${styles.borderCard} ${styles.bgCard} p-6 shadow-sm`}
+  >
+    {/* Description, if present */}
+    {block.description && (
+      <div className={`mb-4 text-md md:text-lg font-semibold break-words ${styles.blockDesc}`}>
+        {block.description}
+      </div>
+    )}
+
+    {/* Language and AI badges */}
+    <div className="flex gap-2 mb-2 flex-wrap">
+      {block.language && (
+        <span className="bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-200 px-2 py-1 rounded text-xs font-semibold">
+          {block.language}
+        </span>
+      )}
+      {block.is_generated ? (
+        <span className="bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-200 px-2 py-1 rounded text-xs font-semibold">
+          AI Generated
+        </span>
+      ) : null}
+    </div>
+
+    {/* Original Code */}
+    {block.code && (
+      <div className="relative group mb-4">
+        <label className="block mb-1 text-xs font-bold text-gray-400 dark:text-gray-500">Original Code:</label>
+        <pre
+          className={`${styles.preBg} ${styles.preText} p-4 rounded-lg text-sm md:text-base overflow-x-auto`}
+          style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
+        >
+          {block.code}
+        </pre>
+        <button
+          className="absolute top-3 right-3 opacity-80 group-hover:opacity-100 bg-gray-700 dark:bg-gray-900 text-white p-2 rounded-lg hover:bg-indigo-600 dark:hover:bg-indigo-700 transition"
+          onClick={() => handleCopy(block.code)}
+          aria-label="Copy code"
+        >
+          <Copy size={16} />
+        </button>
+      </div>
+    )}
+
+    {/* Corrected Code */}
+    {block.corrected_code && (
+      <div className="relative group">
+        <label className="block mb-1 text-xs font-bold text-green-400 dark:text-green-300">Corrected Code:</label>
+        <pre
+          className={`${styles.preBg} ${styles.preText} p-4 rounded-lg text-sm md:text-base overflow-x-auto border border-green-500 dark:border-green-700`}
+          style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
+        >
+          {block.corrected_code}
+        </pre>
+        <button
+          className="absolute top-3 right-3 opacity-80 group-hover:opacity-100 bg-gray-700 dark:bg-gray-900 text-white p-2 rounded-lg hover:bg-green-600 dark:hover:bg-green-700 transition"
+          onClick={() => handleCopy(block.corrected_code)}
+          aria-label="Copy corrected code"
+        >
+          <Copy size={16} />
+        </button>
+      </div>
+    )}
+  </div>
+))}
         </div>
       </div>
 

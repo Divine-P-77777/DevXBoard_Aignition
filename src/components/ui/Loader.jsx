@@ -10,7 +10,7 @@ export default function Loader() {
   return (
     <div
       className={`flex flex-col items-center justify-center min-h-screen gap-6 transition-colors duration-300
-        ${isDarkMode ? "bg-[#0A192F] text-purple-50" : "bg-purple-50 text-gray-900"}
+        ${isDarkMode ? "bg-[#000000] text-purple-50" : "bg-purple-50 text-gray-900"}
       `}
     >
       {/* Logo (static) */}
@@ -24,7 +24,7 @@ export default function Loader() {
 
       {/* Title (static) */}
       <h1 className="text-2xl font-bold tracking-wide">
-        Mediconnection
+        DevXBoard
       </h1>
 
       {/* Animated Line Loader */}

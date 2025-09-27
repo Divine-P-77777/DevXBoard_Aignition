@@ -17,31 +17,32 @@ const Footer = () => {
     },
   };
 
+  // Purple → Light Pink Gradient Background
   const bgClass = isDark
-    ? "bg-gradient-to-tr from-zinc-900 to-black text-white border-t border-zinc-700"
-    : "bg-gradient-to-tr from-white via-pink-50 to-purple-100 text-black border-t border-zinc-200";
+    ? "bg-gradient-to-tr from-purple-700 via-black to-purple-900 text-white border-t border-purple-700"
+    : "bg-gradient-to-tr from-purple-200 via-pink-100 to-pink-200 text-black border-t border-purple-300";
 
-  const linkHoverClass = "hover:text-pink-500 transition";
+  const linkHoverClass = "hover:text-purple-600 transition";
 
   return (
     <footer className={`px-6 py-12 md:px-16 ${bgClass}`}>
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* About Section */}
         <div>
-          <h2 className="text-xl font-semibold mb-2 text-purple-500">
+          <h2 className="text-xl font-semibold mb-2 text-purple-700">
             About DevXBoard
           </h2>
-          <p className="text-sm leading-relaxed text-gray-400">
-            DevXBoard is a platform empowering developers to explore, share, and build using templates, smart tools, and collaborative features.
+          <p className="text-sm leading-relaxed ">
+            DevXBoard empowers developers to explore, share, and build using templates, AI tools, and collaborative features.
           </p>
         </div>
 
         {/* Quick Links */}
         <div>
-          <h2 className="text-xl font-semibold mb-2 text-purple-500">
+          <h2 className="text-xl font-semibold mb-2 text-purple-700">
             Quick Links
           </h2>
-          <ul className="space-y-2 text-sm text-gray-300">
+          <ul className="space-y-2 text-sm ">
             <li>
               <Link href="/" className={linkHoverClass}>
                 Home
@@ -77,10 +78,10 @@ const Footer = () => {
 
         {/* Social Icons */}
         <div>
-          <h2 className="text-xl font-semibold mb-2 text-purple-500">
+          <h2 className="text-xl font-semibold mb-2 text-purple-700">
             Connect with Us
           </h2>
-          <div className="flex gap-4 mt-2 text-gray-300">
+          <div className="flex gap-4 mt-2">
             <motion.a
               href="https://github.com"
               target="_blank"
@@ -124,13 +125,11 @@ const Footer = () => {
       </div>
 
       {/* Bottom Text */}
-      <div className="mt-8 text-center text-xs text-gray-400">
+      <div className="mt-8 text-center text-xs ">
         © {currentYear} DevXBoard. All rights reserved.
       </div>
     </footer>
   );
 };
-
-
 
 export default Footer;

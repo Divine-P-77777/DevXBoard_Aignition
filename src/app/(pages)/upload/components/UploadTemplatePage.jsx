@@ -52,7 +52,16 @@ export default function UploadTemplatePage({ initialData, onSuccess, onCancel })
     } = useTemplateForm(initialData, onSuccess, onCancel);
 
     if (showPreview) {
-        return <TemplatePreview {...{ title, subtitle, visibility, image, codeBlocks }} />;
+        return <TemplatePreview
+  title={title}
+  subtitle={subtitle}
+  visibility={visibility}
+  image={image}
+  codeBlocks={codeBlocks}
+  username="My username"
+  avatarUrl="./default-avatar.png"
+  onBack={() => setShowPreview(false)}
+/>;
     }
 
     return (
