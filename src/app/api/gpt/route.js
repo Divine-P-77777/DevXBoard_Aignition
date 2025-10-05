@@ -1,9 +1,8 @@
-// app/api/gpt/route.js
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 
 const endpoint = "https://models.github.ai/inference";
-const token = process.env.GITHUB_TOKEN;
+const token = process.env.GITHUB_TOKEN_FINE;
 
 export async function POST(req) {
   try {

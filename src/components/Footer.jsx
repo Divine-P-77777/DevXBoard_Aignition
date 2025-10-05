@@ -73,6 +73,11 @@ const Footer = () => {
                 My Profile
               </Link>
             </li>
+            <li>
+              <Link href="/install" className={linkHoverClass}>
+                Install Our App
+              </Link>
+            </li>
           </ul>
         </div>
 

@@ -183,7 +183,7 @@ const Navbar = () => {
       {/* Mobile menu */}
       <AnimatePresence>
         {menuOpen && (
-          <motion.div
+        <motion.div
             initial={{ x: "-100%" }}
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
@@ -191,7 +191,7 @@ const Navbar = () => {
             className={`fixed top-0 left-0 z-50 p-6 pt-20 w-64
               ${isDark ? "bg-black" : "bg-white"} backdrop-blur-2xl
               border-r ${isDark ? "border-pink-400" : "border-purple-300"}
-              ${isDark ? "text-white" : "text-black"} shadow-xl rounded-r-2xl`}
+              ${isDark ? "text-white border-purple-400" : "text-black border-pink-200"} border-1  rounded-2xl`}
           >
             <ul className="flex flex-col gap-4 text-base">
               <li>

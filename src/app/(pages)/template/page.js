@@ -6,6 +6,8 @@ import { useSelector } from "react-redux";
 import clsx from "clsx";
 import { Search, Box, Edit, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { toast, Bounce } from "react-toastify";
+
 
 export default function TemplateStore() {
   const [templates, setTemplates] = useState([]);
@@ -18,18 +20,15 @@ export default function TemplateStore() {
 
   useEffect(() => {
     const fetchTemplates = async () => {
-      if (!user?.id) return; // wait until user.id available
+      if (!user?.id) return;
       setLoading(true);
       try {
         const res = await fetch("/api/template/me", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ user_id: user.id })
+          body: JSON.stringify({ user_id: user.id }),
         });
-
         const json = await res.json();
-        console.log("Templates API response:", json); 
-
         if (res.ok && json.templates) {
           let data = json.templates;
           data.sort((a, b) =>
@@ -39,7 +38,6 @@ export default function TemplateStore() {
           );
           setTemplates(data);
         } else {
-          console.error(json.error || "Failed to fetch templates");
           setTemplates([]);
         }
       } catch (err) {
@@ -62,7 +60,7 @@ export default function TemplateStore() {
       <div
         className={clsx(
           "flex justify-center items-center min-h-screen gap-2",
-          isDarkMode ? "text-white bg-black" : "text-gray-800 bg-purple-100"
+          isDarkMode ? "text-purple-100 bg-gray-900" : "text-purple-800 bg-purple-50"
         )}
       >
         <Loader2 className="animate-spin" /> Loading templates...
@@ -72,14 +70,19 @@ export default function TemplateStore() {
   return (
     <div
       className={clsx(
-        " mx-auto px-6 pt-30 min-h-[1000px] space-y-6",
-        isDarkMode
-          ? "bg-black text-gray-200"
-          : "bg-purple-50 text-gray-900"
+        "mx-auto px-6 pt-30 min-h-[1000px] space-y-6",
+        isDarkMode ? "bg-gray-900 text-purple-100" : "bg-purple-50 text-purple-800"
       )}
     >
-      <h1 className="text-3xl font-bold text-center">My Private Templates</h1>
-      <p className="text-center text-sm text-gray-500 dark:text-gray-400 mb-6">
+      <h1
+        className={clsx(
+          "text-3xl font-bold text-center",
+          isDarkMode ? "text-purple-100" : "text-purple-800"
+        )}
+      >
+        My Private Templates
+      </h1>
+      <p className="text-center text-sm text-gray-400 mb-6">
         Privacy in your hands
       </p>
 
@@ -87,10 +90,10 @@ export default function TemplateStore() {
       <div className="flex flex-wrap gap-4 justify-center mb-6">
         <div
           className={clsx(
-            "flex items-center rounded-lg border px-3 py-2 w-full max-w-sm focus-within:ring-2",
+            "flex items-center rounded-xl border px-3 py-2 w-full max-w-sm focus-within:ring-2 transition-all duration-300",
             isDarkMode
-              ? "border-gray-700 bg-gray-800 focus-within:ring-purple-500"
-              : "border-gray-300 bg-white focus-within:ring-blue-500"
+              ? "border-gray-700 bg-gray-800 focus-within:ring-purple-500 text-purple-100"
+              : "border-gray-300 bg-white focus-within:ring-pink-400 text-purple-800"
           )}
         >
           <Search
@@ -112,10 +115,10 @@ export default function TemplateStore() {
           value={sortOrder}
           onChange={(e) => setSortOrder(e.target.value)}
           className={clsx(
-            "border rounded px-4 py-2",
+            "border rounded px-4 py-2 transition-all duration-300",
             isDarkMode
-              ? "border-gray-700 bg-gray-800 text-gray-200"
-              : "border-gray-300 bg-white text-gray-900"
+              ? "border-gray-700 bg-black text-purple-100"
+              : "border-gray-300 bg-purple-50 text-purple-800"
           )}
         >
           <option value="desc">Newest First</option>
@@ -129,43 +132,49 @@ export default function TemplateStore() {
           <div
             key={template.id}
             className={clsx(
-              "rounded-xl border shadow-md p-5 hover:shadow-xl hover:scale-105 transition-all duration-300",
-              isDarkMode
-                ? "bg-gray-800 border-gray-700"
-                : "bg-white border-gray-200"
+              "rounded-xl border shadow-md p-5 hover:shadow-2xl hover:scale-105 transition-all duration-300",
+              isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
             )}
           >
             <img
               src={template.cover_image || "/placeholder.png"}
               alt={template.title}
-              className="w-full h-44 object-cover rounded-md mb-4"
+              className="w-full h-44 object-cover rounded-md mb-4 border-2 border-purple-400"
             />
-            <h2 className="text-xl font-semibold mb-1">{template.title}</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+            <h2
+              className={clsx(
+                "text-xl font-semibold mb-1",
+                isDarkMode ? "text-purple-100" : "text-purple-800"
+              )}
+            >
+              {template.title}
+            </h2>
+            <p className={clsx("text-sm mb-3", isDarkMode ? "text-gray-400" : "text-gray-600")}>
               {template.subtitle}
             </p>
 
-            <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-3">
+            <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
               <div className="flex items-center gap-1">
-                <Box size={14} />{" "}
-                {template.template_code_blocks?.length || 0} Blocks
+                <Box size={14} /> {template.template_code_blocks?.length || 0} Blocks
               </div>
             </div>
 
             <div className="flex gap-2 mt-3">
               <button
-                onClick={() => router.push(`/template/${template.id}`)}
-                className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-pink-500 hover:to-purple-500 text-white py-2 rounded transition-transform hover:scale-105 flex items-center justify-center gap-2"
+                onClick={() => router.push(`/template/view/${template.id}`)}
+                className="flex-1 bg-gradient-to-r from-purple-500 via-pink-400 to-purple-600 text-white py-2 rounded-xl shadow-lg hover:scale-105 transition-transform duration-300 flex items-center justify-center gap-2"
               >
                 View
               </button>
               <button
-                onClick={() => router.push(`/template/edit/${template.id}`)}
+                onClick={() => {router.push(`/upload`)
+                  toast.success("Click on the pencil icon to edit!", { transition: Bounce, theme: isDarkMode ? "dark" : "light" });
+                }}
                 className={clsx(
-                  "flex-1 border rounded py-2 flex items-center justify-center gap-2",
+                  "flex-1 border rounded-xl py-2 flex items-center justify-center gap-2 transition-all duration-300",
                   isDarkMode
-                    ? "border-gray-600 text-gray-200 hover:bg-gray-700"
-                    : "border-gray-300 text-gray-900 hover:bg-gray-100"
+                    ? "border-gray-600 text-purple-100 hover:bg-gray-700"
+                    : "border-gray-300 text-purple-800 hover:bg-gray-100"
                 )}
               >
                 <Edit size={16} /> Edit

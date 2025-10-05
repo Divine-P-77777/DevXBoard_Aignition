@@ -1,66 +1,75 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/libs/supabase/server";
 
+// POST → Toggle like/unlike
 export async function POST(req) {
   try {
-    const { template_id, action } = await req.json(); // only template_id + action
     const supabase = supabaseServer();
+    const { template_id, user_id } = await req.json();
 
-    // get user from auth session
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-    }
-
-    if (!template_id || !action) {
+    if (!template_id || !user_id)
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+
+    // ✅ Check if already liked
+    const { data: existing, error: selectError } = await supabase
+      .from("template_likes")
+      .select("id")
+      .eq("template_id", template_id)
+      .eq("user_id", user_id)
+      .maybeSingle();
+
+    if (selectError) throw selectError;
+
+    if (existing) {
+      // ✅ Unlike
+      const { error: deleteError } = await supabase
+        .from("template_likes")
+        .delete()
+        .eq("id", existing.id);
+      if (deleteError) throw deleteError;
+
+      // decrement like_count
+      await supabase.rpc("decrement_like", { tid: template_id });
+
+      return NextResponse.json({ message: "Unliked", liked: false });
     }
 
-    if (action === "like") {
-      const { error } = await supabase.rpc("increment_like", { tid: template_id });
-      if (error) throw error;
-      return NextResponse.json({ message: "Liked" });
-    }
+    // ✅ Like
+    const { error: insertError } = await supabase
+      .from("template_likes")
+      .insert({ template_id, user_id });
+    if (insertError) throw insertError;
 
-    if (action === "unlike") {
-      const { error } = await supabase.rpc("decrement_like", { tid: template_id });
-      if (error) throw error;
-      return NextResponse.json({ message: "Unliked" });
-    }
+    await supabase.rpc("increment_like", { tid: template_id });
 
-    return NextResponse.json({ error: "Invalid action" }, { status: 400 });
+    return NextResponse.json({ message: "Liked", liked: true });
   } catch (err) {
     console.error("Like template error:", err);
     return NextResponse.json({ error: "Failed to like/unlike template" }, { status: 500 });
   }
 }
 
-// GET → Get like count
+// GET → Fetch all liked templates for a user
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
-    const template_id = searchParams.get("template_id");
+    const user_id = searchParams.get("user_id");
     const supabase = supabaseServer();
 
-    if (!template_id) {
-      return NextResponse.json({ error: "template_id is required" }, { status: 400 });
-    }
+    if (!user_id)
+      return NextResponse.json({ error: "user_id is required" }, { status: 400 });
 
     const { data, error } = await supabase
-      .from("templates")
-      .select("like_count")
-      .eq("id", template_id)
-      .single();
+      .from("template_likes")
+      .select("id, template_id, created_at, templates(*)")
+      .eq("user_id", user_id)
+      .order("created_at", { ascending: false });
 
     if (error) throw error;
 
-    return NextResponse.json({ like_count: data.like_count });
+    return NextResponse.json({ liked_templates: data });
   } catch (err) {
     console.error("Get likes error:", err);
-    return NextResponse.json({ error: "Failed to fetch likes" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to fetch liked templates" }, { status: 500 });
   }
 }

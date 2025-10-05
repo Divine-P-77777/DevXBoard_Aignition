@@ -9,10 +9,13 @@ import ToastContainer from "@/components/ui/ToastContainer";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import GlobalLoaderWrapper from '@/components/ui/GlobalLoader';
+import useLenis from "@/hooks/useLenisScroll";
+
 
 export default function ReduxProvider({ children }) {
   const pathname = usePathname();
   const hideNavFoot = pathname.startsWith('/template/view/');
+    useLenis();
   return (
     <Provider store={store}>
       {/* PersistGate ensures store is hydrated */}

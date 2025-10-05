@@ -2,17 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import supabase from '@/libs/supabase/client';
-import Image from 'next/image';
 import { useSelector } from 'react-redux';
-import { FaGithub, FaLinkedin, FaTwitter, FaPencilAlt } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
-
+import { FaPencilAlt } from 'react-icons/fa';
 import CloudinaryUploader from '@/libs/Cloudinary';
+import Image from "next/image"
 
 const tabs = ['Templates', 'Saved URLs', 'Activity'];
 
-const ProfilePage = () => {
+export default function ProfilePage() {
   const router = useRouter();
   const { user, signOut } = useAuth();
   const isDarkMode = useSelector((state) => state.theme.isDarkMode);
@@ -36,19 +34,19 @@ const ProfilePage = () => {
     }
   }, [user]);
 
+  // Fetch profile from API
   const fetchProfile = async () => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single();
-
-    if (error && error.code === 'PGRST116') {
-      setEditing(true);
-    } else if (data) {
-      setProfile(data);
-      setNewUsername(data.username);
-      setImageUrl(data.pic || '/default-avatar.png');
+    if (!user?.id) return;
+    try {
+      const res = await fetch(`/api/profile/${user.id}`);
+      const json = await res.json();
+      if (res.ok) {
+        setProfile(json.profile);
+        setNewUsername(json.profile?.username || '');
+        setImageUrl(json.profile?.pic || '/default-avatar.png');
+      }
+    } catch (err) {
+      console.error('Failed to fetch profile', err);
     }
   };
 
@@ -60,63 +58,57 @@ const ProfilePage = () => {
     }
   };
 
+  // Update profile using API
   const handleProfileSubmit = async () => {
+    if (!newUsername.trim()) {
+      setMessage('Username cannot be empty.');
+      return;
+    }
+
     setLoading(true);
     setMessage('');
 
-    if (!newUsername) {
-      setMessage('Username cannot be empty.');
+    try {
+      const res = await fetch(`/api/profile/${user.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: newUsername.trim(), pic: imageUrl }),
+      });
+      const json = await res.json();
+
+      if (res.ok) {
+        setProfile(json.profile);
+        setMessage(json.message || 'Profile updated!');
+        setEditing(false);
+      } else {
+        setMessage(json.error || 'Failed to update profile');
+      }
+    } catch (err) {
+      console.error(err);
+      setMessage('Network error while updating profile');
+    } finally {
       setLoading(false);
-      return;
     }
-
-    const { data: existing, error: checkErr } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('username', newUsername)
-      .neq('id', user.id);
-
-    if (checkErr) {
-      setMessage('Error checking username');
-      setLoading(false);
-      return;
-    }
-
-    if (existing.length > 0) {
-      setMessage('Username already taken.');
-      setLoading(false);
-      return;
-    }
-
-    if (profile) {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ username: newUsername })
-        .eq('id', user.id);
-      if (error) setMessage('Update failed.');
-      else setMessage('Profile updated!');
-    } else {
-      const { error } = await supabase.from('profiles').insert([
-        {
-          id: user.id,
-          email: user.email,
-          username: newUsername,
-          pic: imageUrl,
-        },
-      ]);
-      if (error) setMessage('Failed to create profile.');
-      else setMessage('Profile created!');
-    }
-
-    setEditing(false);
-    fetchProfile();
-    setLoading(false);
   };
 
-  const handlePicUpload = async (url) => {
-    setImageUrl(url);
-    await supabase.from('profiles').update({ pic: url }).eq('id', user.id);
-    fetchProfile();
+  // Upload profile picture using Cloudinary and update via API
+  const handlePicUpload = async (file) => {
+    try {
+      const uploadedUrl = await CloudinaryUploader(file); // returns the uploaded image URL
+      setImageUrl(uploadedUrl);
+
+      // Update pic in profile
+      await fetch(`/api/profile/${user.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pic: uploadedUrl }),
+      });
+
+      fetchProfile();
+    } catch (err) {
+      console.error('Failed to upload image', err);
+      setMessage('Failed to upload profile picture');
+    }
   };
 
   if (user === undefined) {
@@ -127,6 +119,7 @@ const ProfilePage = () => {
     );
   }
 
+  
   return (
     <>
     
@@ -242,4 +235,3 @@ const ProfilePage = () => {
   );
 };
 
-export default ProfilePage;

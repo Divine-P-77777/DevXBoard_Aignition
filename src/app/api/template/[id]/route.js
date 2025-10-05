@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import { supabaseServer } from "@/libs/supabase/server";
 
 export async function GET(req, { params }) {
-  const { id } = await  params; // template.id from URL
+  const { id } = await  params; 
   const searchParams = req.nextUrl.searchParams;
-  const login_user_id = searchParams.get("userID"); // logged-in user id
+  const login_user_id = searchParams.get("userID"); 
 
   if (!id) {
     return NextResponse.json(

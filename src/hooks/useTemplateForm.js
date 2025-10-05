@@ -5,6 +5,13 @@ import { toast, Bounce } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 
+// Helper to strip code fences
+function stripCodeFences(str) {
+  if (!str) return "";
+  // Removes triple backtick blocks, with or without language
+  return str.replace(/^```[\w\s]*\n?([\s\S]*?)\n?```$/gm, '$1').trim();
+}
+
 export function useTemplateForm(initialData, onSuccess) {
   const router = useRouter();
   const { user } = useAuth();
@@ -71,72 +78,12 @@ export function useTemplateForm(initialData, onSuccess) {
       toast.error("❌ AI failed to improve title", { transition: Bounce });
     }
   };
-
   const undoTitle = () => {
     setTitle(titleCorrection.orig);
     setTitleCorrection({ orig: "", ai: "", loading: false, showUndo: false });
   };
 
-
-
-  //  Description handler
-  const handleGenDescription = async (blockId) => {
-    const block = codeBlocks.find((b) => b.id === blockId);
-    if (!block) return;
-    setDescLoading(dl => ({ ...dl, [blockId]: true }));
-    setDescPrev(dp => ({ ...dp, [blockId]: block.description }));
-    try {
-      if (!block.code.trim()) {
-        toast.warn("Write code first or a hint for description!");
-        setDescLoading(dl => ({ ...dl, [blockId]: false }));
-        return;
-      }
-      const res = await fetch("/api/prompt", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: block.code, mode: "description" }),
-      });
-      const data = await res.json();
-      updateCodeBlock(blockId, "description", data.text || block.description);
-    } catch (err) {
-      toast.error("❌ AI failed to generate description");
-    } finally {
-      setDescLoading(dl => ({ ...dl, [blockId]: false }));
-    }
-  };
-
-  // --- Prompt click handler ---
-  const handlePromptClick = (blockId) => {
-    setPromptPopup({ open: true, blockId });
-  };
-
-
-  // --- Generate code from prompt ---
-  const handleGenerateFromPrompt = async (prompt) => {
-    const blockId = promptPopup.blockId;
-    if (!blockId) return;
-    updateCodeBlock(blockId, "loading", true);
-    const block = codeBlocks.find((b) => b.id === blockId);
-    updateCodeBlock(blockId, "prevCode", block.code);
-    try {
-      const res = await fetch("/api/prompt", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, mode: "generate" }),
-      });
-      const data = await res.json();
-      updateCodeBlock(blockId, "code", data.text || "");
-      updateCodeBlock(blockId, "language", data.language || "");
-      toast.success("✅ Code generated from prompt!", { transition: Bounce });
-    } catch (err) {
-      toast.error("❌ AI failed to generate code from prompt");
-    } finally {
-      updateCodeBlock(blockId, "loading", false);
-      setPromptPopup({ open: false, blockId: null });
-    }
-  };
-
-  // Correction subtitle
+  // --- Subtitle AI ---
   const handleAICorrectSubtitle = async () => {
     setSubtitleCorrection((c) => ({ ...c, orig: subtitle, loading: true }));
     try {
@@ -164,7 +111,6 @@ export function useTemplateForm(initialData, onSuccess) {
     setSubtitleCorrection({ orig: "", ai: "", loading: false, showUndo: false });
   };
 
-
   // --- Code Block CRUD ---
   const addCodeBlock = () => {
     if (codeBlocks.length >= 15) {
@@ -181,6 +127,109 @@ export function useTemplateForm(initialData, onSuccess) {
   const updateCodeBlock = (id, key, value) =>
     setCodeBlocks((prev) => prev.map((b) => (b.id === id ? { ...b, [key]: value } : b)));
 
+  // --- Prompt click handler ---
+  const handlePromptClick = (blockId) => {
+    setPromptPopup({ open: true, blockId });
+  };
+
+  // --- Generate code from prompt ---
+  const handleGenerateFromPrompt = async (prompt) => {
+    const blockId = promptPopup.blockId;
+    if (!blockId) return;
+    updateCodeBlock(blockId, "loading", true);
+    const block = codeBlocks.find((b) => b.id === blockId);
+    updateCodeBlock(blockId, "prevCode", block.code);
+    try {
+      const res = await fetch("/api/prompt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt, mode: "generate" }),
+      });
+      const data = await res.json();
+      // Remove code fences if present
+      const strippedCode = stripCodeFences(data.text || "");
+      updateCodeBlock(blockId, "code", strippedCode);
+      updateCodeBlock(blockId, "language", data.language || "");
+      toast.success("✅ Code generated from prompt!", { transition: Bounce });
+    } catch (err) {
+      toast.error("❌ AI failed to generate code from prompt");
+    } finally {
+      updateCodeBlock(blockId, "loading", false);
+      setPromptPopup({ open: false, blockId: null });
+    }
+  };
+
+  // --- Description handler ---
+  const handleGenDescription = async (blockId) => {
+    const block = codeBlocks.find((b) => b.id === blockId);
+    if (!block) return;
+    setDescLoading(dl => ({ ...dl, [blockId]: true }));
+    setDescPrev(dp => ({ ...dp, [blockId]: block.description }));
+    try {
+      if (!block.code.trim()) {
+        toast.warn("Write code first or a hint for description!");
+        setDescLoading(dl => ({ ...dl, [blockId]: false }));
+        return;
+      }
+      const res = await fetch("/api/prompt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: block.code, mode: "description" }),
+      });
+      const data = await res.json();
+      updateCodeBlock(blockId, "description", data.text || block.description);
+    } catch (err) {
+      toast.error("❌ AI failed to generate description");
+    } finally {
+      setDescLoading(dl => ({ ...dl, [blockId]: false }));
+    }
+  };
+
+  // --- Undo Description ---
+  const undoDesc = (blockId) => {
+    if (descPrev[blockId] !== undefined) {
+      updateCodeBlock(blockId, "description", descPrev[blockId]);
+      setDescPrev(dp => ({ ...dp, [blockId]: undefined }));
+    }
+  };
+
+  // --- AI Autocorrect for code ---
+  const handleAI = async (blockId) => {
+    const block = codeBlocks.find((b) => b.id === blockId);
+    if (!block || !block.code.trim()) {
+      toast.warn("Write some code first!");
+      return;
+    }
+    updateCodeBlock(blockId, "loading", true);
+    updateCodeBlock(blockId, "prevCode", block.code);
+    try {
+      const res = await fetch("/api/prompt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: block.code, mode: "autocorrect" }),
+      });
+      const data = await res.json();
+      // Remove code fences if present
+      const strippedCode = stripCodeFences(data.generated_code || "");
+      updateCodeBlock(blockId, "code", strippedCode);
+      updateCodeBlock(blockId, "language", data.language || block.language || "");
+      toast.success("✅ Code autocorrected!", { transition: Bounce });
+    } catch (err) {
+      toast.error("❌ AI failed to autocorrect code");
+    } finally {
+      updateCodeBlock(blockId, "loading", false);
+    }
+  };
+
+  // --- Undo code change ---
+  const undoCode = (blockId) => {
+    const block = codeBlocks.find((b) => b.id === blockId);
+    if (block && block.prevCode !== undefined) {
+      updateCodeBlock(blockId, "code", block.prevCode);
+      updateCodeBlock(blockId, "prevCode", "");
+    }
+  };
+
   // --- Submit handler ---
   const handleSubmit = () => {
     if (!image || !title.trim()) {
@@ -195,45 +244,69 @@ export function useTemplateForm(initialData, onSuccess) {
     setShowConfirm(true);
   };
 
+  const confirmSubmit = async () => {
+    setLoading(true);
+    try {
+      const payload = {
+        user_id: user.id,
+        title,
+        subtitle,
+        visibility,
+        cover_image: image,
+        blocks: codeBlocks.map(({ id, description, code, language }) => ({
+          id, description, code, language,
+        })),
+        template_id: initialData && initialData.id ? initialData.id : undefined, // include for update
+      };
+      const res = await fetch(`/api/template`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success(
+          initialData && initialData.id ? " Template updated!" : " Template submitted!",
+          { transition: Bounce }
+        );
+        if (onSuccess) onSuccess(data.data);
+        setShowConfirm(false);
+      } else {
+        throw new Error(data.error || "Submit failed");
+      }
+    } catch (err) {
+      toast.error(` ${err.message || "Failed to submit template"}`, { transition: Bounce });
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
-
-const confirmSubmit = async () => {
-  setLoading(true);
+  const handleAICorrectCode = async (blockId) => {
+  const block = codeBlocks.find((b) => b.id === blockId);
+  if (!block || !block.code.trim()) {
+    toast.warn("Write some code first!");
+    return;
+  }
+  updateCodeBlock(blockId, "loading", true);
+  updateCodeBlock(blockId, "prevCode", block.code);
   try {
-    const payload = {
-      user_id: user.id,
-      title,
-      subtitle,
-      visibility,
-      cover_image: image,
-      blocks: codeBlocks.map(({ id, description, code, language }) => ({
-        id, description, code, language,
-      })),
-      template_id: initialData && initialData.id ? initialData.id : undefined, // include for update
-    };
-    const res = await fetch(`/api/template`, {
+    const res = await fetch("/api/code-correct", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ code: block.code }),
     });
     const data = await res.json();
-    if (res.ok && data.success) {
-      toast.success(
-        initialData && initialData.id ? " Template updated!" : " Template submitted!",
-        { transition: Bounce }
-      );
-      if (onSuccess) onSuccess(data.data);
-      setShowConfirm(false);
-    } else {
-      throw new Error(data.error || "Submit failed");
-    }
+    updateCodeBlock(blockId, "code", data.corrected_code || "");
+    updateCodeBlock(blockId, "language", data.language || block.language || "");
+    toast.success("✅ Code autocorrected!", { transition: Bounce });
   } catch (err) {
-    toast.error(` ${err.message || "Failed to submit template"}`, { transition: Bounce });
+    toast.error("❌ AI failed to autocorrect code");
   } finally {
-    setLoading(false);
+    updateCodeBlock(blockId, "loading", false);
   }
 };
+
 
   return {
     // state
@@ -256,6 +329,10 @@ const confirmSubmit = async () => {
     confirmSubmit,
     handlePromptClick,
     handleGenerateFromPrompt,
-    handleGenDescription
+    handleGenDescription,
+    handleAI,
+    undoCode,
+    undoDesc,
+    handleAICorrectCode
   };
 }

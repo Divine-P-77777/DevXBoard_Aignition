@@ -7,7 +7,9 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Database, Code, Users, Settings } from 'lucide-react';
 import Image from 'next/image';
-
+import FAQ from '@/components/FAQ';
+import Reviews from '@/components/Reviews';
+import CommunitySection from './CommunitySection';
 
 export default function Home() {
   const isDark = useSelector((state) => state.theme.isDarkMode);
@@ -83,7 +85,7 @@ export default function Home() {
               Build multiple cards, auto-generate metadata, share code, and explore public templates — all automated for you.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-              <Link 
+              <Link
                 href="/upload"
                 className="px-6 py-3 text-center font-semibold rounded-lg text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-[0_0_20px_rgba(99,102,241,0.6)] transition w-full sm:w-auto"
               >
@@ -139,14 +141,15 @@ export default function Home() {
 
         {/* How It Works */}
         <section
-          className="max-w-6xl mx-auto px-6 py-20 rounded-2xl my-16"
+          className="max-w-6xl mx-auto px-6 py-20 rounded-2xl my-16 backdrop-blur-2xl border-[1px] border-purple-400  shadow-purple-400
+"
           style={{
             background: isDark
               ? 'linear-gradient(135deg, #1a1a1a, #3c096c)'
               : 'linear-gradient(135deg, #e0f2ff, #f3e8ff)',
           }}
         >
-          <h2 className="text-4xl font-bold text-center mb-12">🚀 How It Works</h2>
+          <h2 className="text-4xl font-bold text-center mb-12">How It Works</h2>
           <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-3">
             {howItWorks.map((step, idx) => (
               <motion.div
@@ -167,34 +170,7 @@ export default function Home() {
         </section>
 
         {/* Community Showcase */}
-        <section className="max-w-7xl mx-auto px-6 py-20">
-          <h2 className="text-4xl font-bold text-center mb-12">🌐 Community Showcase</h2>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {[...Array(6)].map((_, idx) => (
-              <motion.div
-                key={idx}
-                className={`p-5 rounded-xl shadow-md hover:shadow-lg transition hover:scale-105 ${isDark ? 'bg-gray-900 border border-gray-700' : 'bg-white border border-gray-200'}`}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: idx * 0.1 }}
-              >
-                <div className="h-40 bg-gradient-to-r from-blue-300 to-purple-300 dark:from-gray-700 dark:to-gray-800 rounded-md mb-4 flex items-center justify-center text-white font-semibold">
-                  Template Preview
-                </div>
-                <h3 className="font-semibold mb-1">Template Title</h3>
-                <p className="text-xs opacity-70 mb-2">By Username</p>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs opacity-50">Blocks: 5</span>
-                  <button className="px-3 py-1 text-xs rounded bg-blue-600 text-white hover:bg-blue-700 transition">
-                    View
-                  </button>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </section>
-
+       <CommunitySection/>
         {/* CTA */}
         <section className="max-w-7xl mx-auto px-6 py-20 text-center">
           <h2 className="text-4xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-500">
@@ -204,7 +180,7 @@ export default function Home() {
             Keep some cards private, share others publicly — you control everything with ease.
           </p>
           <div className="flex justify-center gap-4 flex-wrap">
-            <Link 
+            <Link
               href="/upload"
               className="px-8 py-3 font-semibold rounded-lg text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-[0_0_20px_rgba(99,102,241,0.7)] transition"
             >
@@ -218,6 +194,9 @@ export default function Home() {
             </Link>
           </div>
         </section>
+
+        <Reviews isDark={isDark}  />
+        <FAQ isDark={isDark}  />
       </main>
     </div>
   );

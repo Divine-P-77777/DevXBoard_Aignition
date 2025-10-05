@@ -13,16 +13,28 @@ export async function POST(req) {
   try {
     const { code, prompt, mode } = await req.json();
 
-    // Validation
-    if (mode === "generate" && !prompt) {
+    // Robust validation
+    if (mode === "generate") {
+      if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
+        return NextResponse.json(
+          { error: "Prompt is required for code generation" },
+          { status: 400 }
+        );
+      }
+      // Only push message if prompt is valid
+      var contentUser = `Generate code for:\n${prompt}`;
+    } else if (mode === "autocorrect") {
+      if (!code || typeof code !== "string" || !code.trim()) {
+        return NextResponse.json(
+          { error: "Code is required for autocorrect" },
+          { status: 400 }
+        );
+      }
+      // Only push message if code is valid
+      var contentUser = `Autocorrect and improve this code:\n${code}`;
+    } else {
       return NextResponse.json(
-        { error: "Prompt is required for code generation" },
-        { status: 400 }
-      );
-    }
-    if (mode === "autocorrect" && !code) {
-      return NextResponse.json(
-        { error: "Code is required for autocorrect" },
+        { error: "Unknown mode" },
         { status: 400 }
       );
     }
@@ -34,23 +46,15 @@ export async function POST(req) {
 Return only JSON in this format: 
 {"language": "<language>", "code": "<corrected_or_generated_code>"}`,
       },
+      {
+        role: "user",
+        content: contentUser,
+      },
     ];
-
-    if (mode === "generate") {
-      messages.push({
-        role: "user",
-        content: `Generate code for:\n${prompt}`,
-      });
-    } else if (mode === "autocorrect") {
-      messages.push({
-        role: "user",
-        content: `Autocorrect and improve this code:\n${code}`,
-      });
-    }
 
     // Call GitHub Models API
     const response = await openai.chat.completions.create({
-      model: "openai/gpt-4.1", // Use a supported model, e.g., "openai/gpt-4.1"
+      model: "openai/gpt-4.1",
       messages,
       temperature: 0.2,
     });

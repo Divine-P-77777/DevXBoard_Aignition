@@ -93,6 +93,7 @@ export default function UploadTemplatePage({ initialData, onSuccess, onCancel })
             )}
             {/* Code Prompt Popup */}
             <CodePromptPopup
+            isDarkMode={isDarkMode}
                 visible={promptPopup.open}
                 onClose={() => setPromptPopup({ open: false, blockId: null })}
                 onGenerate={handleGenerateFromPrompt}
@@ -158,12 +159,14 @@ export default function UploadTemplatePage({ initialData, onSuccess, onCancel })
                         handleAICorrectSubtitle={handleAICorrectSubtitle}
                         subtitleCorrection={subtitleCorrection}
                         undoSubtitle={undoSubtitle}
+                        isDarkMode={isDarkMode}
                     />
 
                     {/* Visibility */}
                     <VisibilitySection
                         visibility={visibility}
                         setVisibility={setVisibility}
+                        isDarkMode={isDarkMode}
                     />
 
                     {/* Code Blocks */}

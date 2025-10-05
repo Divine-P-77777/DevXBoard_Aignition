@@ -33,6 +33,7 @@ export default function RootLayout({ children }) {
         <meta property="og:url" content="https://devxboard.vercel.app" />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="DevXBoard" />
+        <meta name="google-site-verification" content="CylSRxdRveVgo_GfP8_5zbixOgwQ2FOlZaIfcdpzfzA" />
 
         {/* Twitter Card */}
         <meta name="twitter:card" content="/favicon.png" />
