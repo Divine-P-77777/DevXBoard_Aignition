@@ -223,12 +223,28 @@ useCheckProfileComplete();
   return (
     <div className={`min-h-screen pt-30 mx-auto p-6 ${isDarkMode ? "bg-gray-950 text-gray-100" : "bg-gray-50 text-gray-900"}`}>
       <div className={`max-w-5xl mx-auto ${isDarkMode ? "bg-gray-950 text-gray-100" : "bg-gray-50 text-gray-900"}`}>
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-2xl font-bold">Your Templates</h2>
-          <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition" onClick={handleCreate}>
-            <Plus size={18} /> Post Template Now
-          </button>
-        </div>
+
+
+        <div
+  className={`flex flex-col sm:flex-row items-center justify-between gap-4 mb-6 p-5 rounded-2xl border shadow-md transition-all duration-300 
+  ${isDarkMode ? "bg-gradient-to-r from-purple-900 to-black border-gray-800 text-gray-100" : "bg-gradient-to-r from-purple-200 to-pink-200 border-gray-200 text-gray-900"}`}
+>
+  <h2 className="text-2xl font-bold tracking-wide">Your Templates</h2>
+
+  <button
+    onClick={handleCreate}
+    className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95
+    ${
+      isDarkMode
+        ? "bg-gradient-to-r from-purple-600 via-pink-600 to-fuchsia-700 hover:from-fuchsia-700 hover:to-purple-700 text-white"
+        : "bg-gradient-to-r from-purple-500 via-pink-500 to-fuchsia-600 hover:from-fuchsia-600 hover:to-purple-600 text-white"
+    }`}
+  >
+    <Plus size={18} className="text-white" />
+    Post Template Now
+  </button>
+</div>
+
 
         {/* Modal/Uploader */}
         {showUploader && (

@@ -90,18 +90,20 @@ const {router} = useRouter();
 
   // Fetch cards
   const fetchCards = useCallback(async () => {
-    setLoading(true);
-    let query = supabase
-      .from("card")
-      .select("*, urls:url_store(*)")
-      .eq("user_id", user?.id)
-      .order("created_at", { ascending: false });
+  setLoading(true);
+  let query = supabase
+    .from("card")
+    .select("*, urls:url_store(*)")
+    .eq("user_id", user?.id)
+    .order("created_at", { ascending: false });
 
-    if (search.trim()) query = query.ilike("name", `%${search}%`);
-    const { data } = await query;
-    setCards(data || []);
-    setLoading(false);
-  }, [user?.id, search]);
+  if (search.trim()) query = query.ilike("name", `%${search}%`);
+  const { data, error } = await query;
+  if (error) console.error("Fetch cards error:", error.message);
+  setCards(data || []);
+  setLoading(false);
+}, [user?.id, search]);
+
 
   useEffect(() => { if (user) fetchCards(); }, [user, search, fetchCards]);
 
@@ -201,14 +203,6 @@ const {router} = useRouter();
     setLoading(false);
   }, [user?.id, reset, fetchCards, editCard]);
 
-  // Delete card
-  const handleDeleteCard = useCallback(async (cardId) => {
-    setLoading(true);
-    await supabase.from("card").delete().eq("id", cardId);
-    fetchCards();
-    setLoading(false);
-    toast('Card deleted successfully!');
-  }, [fetchCards]);
 
   const isImageUploaded = Boolean(imageUrl);
 
@@ -216,7 +210,7 @@ const {router} = useRouter();
     <>
       {error && (<div className="toast fixed top-4 left-1/2 -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded shadow z-50">{error}</div>)}
       <div className={clsx("min-h-screen", isDarkMode ? "bg-gradient-to-br from-black via-gray-900 to-black text-gray-300" : "bg-gradient-to-br from-purple-300 via-white to-pink-300 text-gray-900")}>
-        <ConfirmPopup visible={!!confirmId} onCancel={() => setConfirmId(null)} onConfirm={() => handleDeleteCard(confirmId)} />
+        {/* <ConfirmPopup visible={!!confirmId} onCancel={() => setConfirmId(null)} onConfirm={() => handleDeleteCard(confirmId)} /> */}
         <div className="flex flex-col justify-center items-center pt-30 px-4 gap-3">
           {/* Add New */}
           <button onClick={() => openCardForm()} className={clsx("relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium rounded-lg group",
@@ -382,6 +376,7 @@ const {router} = useRouter();
                     isDark={isDarkMode}
                     onDelete={id => setConfirmId(id)}
                     onEdit={() => openCardForm(card)}
+                    fetchCards={fetchCards}
                   />
                 ))}
               </div>

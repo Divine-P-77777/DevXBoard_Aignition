@@ -1,10 +1,10 @@
 import SharedCardPage from "./components/SharedCardPage";
 import { supabaseServer } from "@/libs/supabase/server";
 
-export const dynamic = "force-dynamic"; // ensure fresh dynamic metadata
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }) {
-  const { id } = params;
+  const { id } = await params;
 
   if (!id) {
     return {
@@ -16,34 +16,34 @@ export async function generateMetadata({ params }) {
   try {
     const supabase = supabaseServer();
 
-    // Fetch public card data with owner profile
-    const { data: card, error } = await supabase
+    // Fetch card and profile manually
+    const { data: card, error: cardError } = await supabase
       .from("card")
-      .select(`
-        id,
-        name,
-        bg_image,
-        pic,
-        is_public,
-        profiles:profiles!card_user_id_fkey (
-          username,
-          pic
-        )
-      `)
+      .select("*")
       .eq("id", id)
       .eq("is_public", true)
       .single();
 
-    if (error || !card) {
-      console.error("Supabase fetch error:", error);
+    if (cardError || !card) {
+      console.error("Card fetch error:", cardError);
       return {
         title: "Card Not Found",
         description: "This card is either private or does not exist.",
-        openGraph: { title: "Card Not Found" },
       };
     }
 
-    const username = card.profiles?.username || "Unknown User";
+    // Fetch linked profile manually
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("username, pic")
+      .eq("id", card.user_id)
+      .single();
+
+    if (profileError) {
+      console.warn("Profile not found:", profileError);
+    }
+
+    const username = profile?.username || "Unknown User";
     const image =
       card.bg_image ||
       card.pic ||
@@ -85,7 +85,6 @@ export async function generateMetadata({ params }) {
   }
 }
 
-export default function Page({ params }) {
-  const { id } = params;
-  return <SharedCardPage id={id} />;
+export default function Page() {
+  return <SharedCardPage />;
 }

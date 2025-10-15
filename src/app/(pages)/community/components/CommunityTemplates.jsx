@@ -32,7 +32,7 @@ export default function CommunityTemplates() {
 
       try {
         const res = await fetch(
-          `/api/template/community?limit=10&offset=${reset ? 0 : page * 10}&filter=${filter}`
+          `/api/template/community?limit=10&offset=${reset ? 0 : page * 5}&filter=${filter}`
         );
         const json = await res.json();
         if (!res.ok) throw new Error("Template fetch failed");
@@ -235,8 +235,8 @@ export default function CommunityTemplates() {
     >
       <Sidebar view={view} setView={setView} isDarkMode={isDarkMode} />
 
-      <main className="flex-1 px-4 md:px-8 py-8 space-y-8">
-        <h1 className="text-4xl font-bold mb-6 text-center text-gradient bg-gradient-to-r from-purple-500 to-pink-400 bg-clip-text text-transparent">
+      <main className="flex-1 px-4 md:px-8 py-8 space-y-8 pt-30">
+        <h1 className="sm:text-4xl text-2xl font-bold mb-6 text-center text-gradient bg-gradient-to-r from-purple-500 to-pink-400 bg-clip-text text-transparent">
           {view === "liked"
             ? "Liked Blogs"
             : view === "saved"
