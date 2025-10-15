@@ -13,6 +13,8 @@
     "@azure/core-auth": "^1.9.0",
     "@emailjs/browser": "^4.4.1",
     "@google/genai": "^0.14.1",
+    "@headlessui/react": "^2.2.9",
+    "@lottiefiles/dotlottie-react": "^0.17.4",
     "@monaco-editor/react": "^4.7.0",
     "@reduxjs/toolkit": "^2.8.2",
     "@studio-freight/lenis": "^1.0.42",

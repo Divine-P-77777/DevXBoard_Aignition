@@ -1,10 +1,10 @@
-import TemplateViewPage from "./TemplateViewPage";
+import TemplateViewPage from "./components/TemplateViewPage";
 import { supabaseServer } from "@/libs/supabase/server";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }) {
-  const { id } = params;
+  const { id } = await params;
 
   if (!id) {
     return {
@@ -16,19 +16,31 @@ export async function generateMetadata({ params }) {
   try {
     const supabase = supabaseServer();
 
-    // Fetch template + owner info
-    const { data: template, error } = await supabase
+    // 1️⃣ Fetch template info
+    const { data: template, error: templateError } = await supabase
       .from("templates")
-      .select("*, template_code_blocks(*), profiles(username, pic)")
+      .select("*")
       .eq("id", id)
       .single();
 
-    if (error || !template) {
+    if (templateError || !template) {
       return { title: "Template not found" };
     }
 
+    // 2️⃣ Fetch template owner profile separately
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("username, pic")
+      .eq("id", template.user_id)
+      .single();
+
+    if (profileError) {
+      console.warn("Owner profile not found:", profileError);
+    }
+
+    // 3️⃣ Build description
     const description =
-      template?.template_code_blocks?.[0]?.description?.slice(0, 160) ||
+      template.template_code_blocks?.[0]?.description?.slice(0, 160) ||
       "Check out this template.";
 
     return {
@@ -39,7 +51,7 @@ export async function generateMetadata({ params }) {
         description,
         images: [
           {
-            url: template.image || "/logo.png",
+            url: template.cover_image || profile?.pic || "/logo.png",
             width: 800,
             height: 600,
             alt: template.title || "Template preview",
@@ -51,7 +63,7 @@ export async function generateMetadata({ params }) {
         card: "summary_large_image",
         title: template.title,
         description,
-        images: [template.image || "/logo.png"],
+        images: [template.cover_image || profile?.pic || "/logo.png"],
       },
     };
   } catch (err) {

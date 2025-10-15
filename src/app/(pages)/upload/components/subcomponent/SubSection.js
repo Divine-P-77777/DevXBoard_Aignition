@@ -1,8 +1,212 @@
 "use client";
 
-import { Sparkles, Loader2, Undo2, Globe, Lock } from "lucide-react";
+import { Sparkles, Loader2, Undo2, Globe, Lock,UserPlus } from "lucide-react";
 import Toggle from "../Toggle";
 import CodeBlockCell from "../CodeBlockItem";
+import {useState,useEffect , useRef} from "react"
+
+
+
+export function VisibilitySection({
+  visibility,
+  setVisibility,
+  isDarkMode,
+  sharedEmails,
+  setSharedEmails,
+}) {
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // 🔍 Fetch usernames matching the query
+  useEffect(() => {
+    if (!query.trim()) {
+      setResults([]);
+      return;
+    }
+
+    const delayDebounce = setTimeout(async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/profile/search?q=${encodeURIComponent(query)}`);
+        const data = await res.json();
+        if (data.success) {
+          setResults(data.profiles || []);
+        } else {
+          setResults([]);
+        }
+      } catch (err) {
+        console.error("Search error:", err);
+      } finally {
+        setLoading(false);
+      }
+    }, 400); // debounce typing
+
+    return () => clearTimeout(delayDebounce);
+  }, [query]);
+
+  // ⏬ Hide dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
+
+  const handleAddUser = (username) => {
+    if (!sharedEmails.includes(username)) {
+      setSharedEmails([...sharedEmails, username]);
+      setQuery("");
+      setResults([]);
+      setShowDropdown(false);
+    }
+  };
+
+  const handleEnter = (e) => {
+    if (e.key === "Enter" && results.length > 0) {
+      handleAddUser(results[0].username);
+    }
+  };
+
+  const handleRemove = (username) => {
+    setSharedEmails(sharedEmails.filter((u) => u !== username));
+  };
+
+  return (
+    <div className="flex flex-col gap-4 mt-4">
+      {/* Visibility toggle */}
+      <div className="flex gap-4 items-center">
+        <span
+          className={`font-medium ${
+            isDarkMode ? "text-gray-200" : "text-gray-800"
+          }`}
+        >
+          Visibility:
+        </span>
+        <button
+          type="button"
+          onClick={() =>
+            setVisibility((v) => (v === "public" ? "private" : "public"))
+          }
+          className={`flex gap-2 items-center px-3 py-1 rounded transition ${
+            visibility === "public"
+              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+              : "bg-gray-200 text-gray-600 dark:bg-gray-800 dark:text-gray-300"
+          }`}
+        >
+          {visibility === "public" ? (
+            <>
+              <Globe size={18} />
+              <span>Public</span>
+            </>
+          ) : (
+            <>
+              <Lock size={18} />
+              <span>Private</span>
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* Private section for shared users */}
+      {visibility === "private" && (
+        <div
+          className={`space-y-3 border rounded-md p-3 mt-2 ${
+            isDarkMode
+              ? "border-gray-700 bg-gray-900"
+              : "border-gray-200 bg-gray-50"
+          }`}
+        >
+          <p className="text-sm text-gray-500">
+            Search usernames to grant private access:
+          </p>
+
+          <div className="relative" ref={dropdownRef}>
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setShowDropdown(true);
+              }}
+              onKeyDown={handleEnter}
+              placeholder="Search username..."
+              className={`w-full px-3 py-2 rounded border ${
+                isDarkMode
+                  ? "bg-gray-800 border-gray-700 text-white"
+                  : "bg-white border-gray-300 text-black"
+              }`}
+            />
+
+            {/* Loader or Results dropdown */}
+            {showDropdown && query.trim() && (
+              <div
+                className={`absolute z-20 w-full mt-1 rounded-lg shadow-lg border ${
+                  isDarkMode
+                    ? "bg-gray-900 border-gray-700"
+                    : "bg-white border-gray-200"
+                }`}
+              >
+                {loading ? (
+                  <div className="flex items-center justify-center py-2">
+                    <Loader2 className="animate-spin w-5 h-5 text-gray-400" />
+                  </div>
+                ) : results.length > 0 ? (
+                  results.map((u) => (
+                    <div
+                      key={u.id}
+                      onClick={() => handleAddUser(u.username)}
+                      className={`flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 ${
+                        sharedEmails.includes(u.username)
+                          ? "opacity-50 pointer-events-none"
+                          : ""
+                      }`}
+                    >
+                      <img
+                        src={u.pic || "/default-avatar.png"}
+                        alt={u.username}
+                        className="w-7 h-7 rounded-full"
+                      />
+                      <span className="text-sm">{u.username}</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="px-3 py-2 text-sm text-gray-500">
+                    No results found
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Added users */}
+          <div className="flex flex-wrap gap-2 mt-2">
+            {sharedEmails.map((username) => (
+              <span
+                key={username}
+                className="px-2 py-1 text-xs rounded-full bg-gray-200 dark:bg-gray-800 flex items-center gap-1"
+              >
+                {username}
+                <button
+                  type="button"
+                  onClick={() => handleRemove(username)}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 /* ---------------- Utility for Theme ---------------- */
 function getInputClasses(isDarkMode) {
@@ -108,41 +312,9 @@ export function TitleSection({
 }
 
 /* ---------------- Visibility Section ---------------- */
-export function VisibilitySection({ visibility, setVisibility, isDarkMode }) {
-  return (
-    <div className="flex gap-4 items-center mt-4 ">
-      <span
-        className={`font-medium ${isDarkMode ? "text-gray-200" : "text-gray-800"}`}
-      >
-        Visibility:
-      </span>
-      <Toggle isDarkMode={isDarkMode}
-        pressed={visibility === "public"}
-        onPressedChange={() =>
-          setVisibility((v) => (v === "public" ? "private" : "public"))
-        }
-      >
-        {visibility === "public" ? (
-          <div className="flex gap-2 items-center text-sm font-medium ">
-            <Globe
-              color={isDarkMode ? "white" : "black"}
-              className="w-5 h-5"
-            />
-            <span className={isDarkMode ? "text-white" : "text-black"}>Public</span>
-          </div>
-        ) : (
-          <div className="flex gap-2 items-center text-sm font-medium">
-            <Lock
-              color={isDarkMode ? "white" : "black"}
-              className="w-5 h-5"
-            />
-            <span className={isDarkMode ? "text-white" : "text-black"}>Private</span>
-          </div>
-        )}
-      </Toggle>
-    </div>
-  );
-}
+
+
+
 
 /* ---------------- Code Blocks Section ---------------- */
 export function CodeBlocksSection({

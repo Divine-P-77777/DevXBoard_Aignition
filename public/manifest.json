@@ -1,1 +1,26 @@
-{"theme_color":"#8936FF","background_color":"#000000","icons":[{"purpose":"maskable","sizes":"512x512","src":"icon512_maskable.png","type":"image/png"},{"purpose":"any","sizes":"512x512","src":"icon512_rounded.png","type":"image/png"}],"orientation":"any","display":"standalone","dir":"auto","lang":"en-GB","name":"DevXBoard","short_name":"DXB","start_url":"DevXBoard.vercel.app","scope":"https://DevXBoard.vercel.app","description":"      AI Copilot for Developers & Creators"}
+{
+  "name": "DevXBoard - Your Productivity Partner",
+  "short_name": "DevXBoard",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "lang": "en-IN",
+  "background_color": "#000000",
+  "theme_color": "#ff6f00",
+  "description": "DevXBoard is a developer-centric platform to create, share, and manage AI-powered link cards, templates, and projects.",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon512_rounded.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ]
+}

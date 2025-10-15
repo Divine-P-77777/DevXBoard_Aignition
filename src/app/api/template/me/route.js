@@ -10,17 +10,22 @@ export async function POST(req) {
 
     const supabase = supabaseServer();
 
-    // 1. Get private templates for user
+    // 1️⃣ Get all private templates for user
     const { data: templates, error: templatesError } = await supabase
       .from("templates")
-      .select("*")
+      .select("*, template_shares(shared_with_email)")
       .eq("user_id", user_id)
       .eq("visibility", "private")
       .order("created_at", { ascending: false });
 
     if (templatesError) throw templatesError;
 
-    // 2. Get profile info for this user
+    // 2️⃣ Filter templates that have NO shares (i.e., private to you)
+    const privateOnly = (templates || []).filter(
+      (t) => !t.template_shares || t.template_shares.length === 0
+    );
+
+    // 3️⃣ Get profile info for this user
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("id, username, email, pic")
@@ -29,8 +34,8 @@ export async function POST(req) {
 
     if (profileError) throw profileError;
 
-    // 3. Merge profile into each template
-    const templatesWithProfile = templates.map(t => ({
+    // 4️⃣ Merge profile into each template
+    const templatesWithProfile = privateOnly.map((t) => ({
       ...t,
       profile,
     }));

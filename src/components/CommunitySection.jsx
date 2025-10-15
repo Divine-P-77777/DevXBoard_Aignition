@@ -57,8 +57,8 @@ const CommunitySection = () => {
     : 'bg-gradient-to-br from-pink-200 to-purple-400 text-black';
 
   return (
-    <div className="mx-20 py-16">
-      <h2 className="text-4xl font-bold text-center mb-12">🌐 Community Showcase</h2>
+    <div className="mx-8 sm:mx-20  py-16">
+      <h2 className="text-2xl sm:text-4xl font-bold text-center mb-12"> <span className='text-purple-400'>Community</span> Showcase</h2>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {communityPosts.map((post, idx) => (
           <motion.div

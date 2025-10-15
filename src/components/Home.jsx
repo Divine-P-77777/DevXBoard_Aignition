@@ -120,7 +120,7 @@ export default function Home() {
 
         {/* Features Section */}
         <section className="max-w-7xl mx-auto px-6 py-20">
-          <h2 className="text-4xl font-bold text-center mb-12">⚡ Powerful AI Features</h2>
+          <h2 className="text-2xl sm:text-4xl font-bold text-center mb-12"><span className='text-purple-400'> Powerful</span> <span className='text-pink-400'>AI </span>Features</h2>
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {features.map((f, idx) => (
               <motion.div
@@ -141,7 +141,7 @@ export default function Home() {
 
         {/* How It Works */}
         <section
-          className="max-w-6xl mx-auto px-6 py-20 rounded-2xl my-16 backdrop-blur-2xl border-[1px] border-purple-400  shadow-purple-400
+          className="max-w-6xl  px-6 mx-9 sm:mx-auto py-20 rounded-2xl my-16 backdrop-blur-2xl border-[1px] border-purple-400  shadow-purple-400
 "
           style={{
             background: isDark

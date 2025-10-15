@@ -12,7 +12,6 @@ import { toggleDarkMode } from "@/store/themeSlice";
 import { useAuth } from "@/hooks/useAuth";
 import useScrollDirection from "@/hooks/useScrollDirection";
 
-
 // Helper to copy code and show toast
 const handleCopy = async (code) => {
   try {
@@ -43,68 +42,106 @@ const TemplateViewPage = () => {
   const [filteredBlocks, setFilteredBlocks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [hasAccess, setHasAccess] = useState(true);
-const [scrollProgress, setScrollProgress] = useState(0);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
+
+ const styles = {
+    bgBase: isDark ? "bg-[#0B0B13]" : "bg-[#F6F6F8]",
+    textMain: isDark ? "text-white" : "text-gray-900",
+    textSecondary: isDark ? "text-gray-400" : "text-gray-700",
+    borderCard: isDark ? "border-gray-700" : "border-gray-200",
+    bgCard: isDark ? "bg-[#181825]" : "bg-white",
+    bgNavbar: isDark ? "bg-[#13131C]" : "bg-white",
+    bgSearch: isDark ? "bg-[#22223C]" : "bg-gray-100",
+    inputText: isDark ? "text-white" : "text-gray-900",
+    borderIndigo: isDark ? "border-indigo-500" : "border-indigo-600",
+    blockDesc: isDark ? "text-indigo-300" : "text-indigo-700",
+    preBg: isDark ? "bg-[#14141c]" : "bg-gray-900",
+    preText: "text-cyan-200",
+  };
 
   // Fetch template by id + owner profile
 
   useEffect(() => {
-  const handleScroll = () => {
-    const scrollTop = window.scrollY;
-    const docHeight = document.body.scrollHeight - window.innerHeight;
-    const scrolled = (scrollTop / docHeight) * 100;
-    setScrollProgress(scrolled);
-  };
-
-  window.addEventListener("scroll", handleScroll);
-  return () => window.removeEventListener("scroll", handleScroll);
-}, []);
-
-
-  useEffect(() => {
-    const fetchTemplate = async () => {
-      setLoading(true);
-      try {
-        // If user is not logged in, send request without userID
-        const viewerId = user?.id || "";
-        const res = await fetch(`/api/template/${id}${viewerId ? `?userID=${viewerId}` : ""}`);
-        if (res.status === 403) {
-          setHasAccess(false);
-          setLoading(false);
-          return;
-        }
-        const data = await res.json();
-        if (!data.success) throw new Error(data.error);
-
-        const { profile, template } = data.data;
-        if (!template) {
-          setTemplate(null);
-          setHasAccess(false);
-          return;
-        }
-
-        setTemplate({
-          ...template,
-          user: {
-            username: profile?.username || "Unknown",
-            avatar_url: profile?.pic || "",
-          },
-          blocks: template.template_code_blocks || [],
-          isPublic: template.visibility === "public"
-        });
-        setFilteredBlocks(template.template_code_blocks || []);
-        setHasAccess(template.visibility === "public" || (user && user.id));
-      } catch (err) {
-        console.error(err);
-        toast.error("Failed to load template", { transition: Bounce });
-        setHasAccess(false);
-      } finally {
-        setLoading(false);
-      }
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.body.scrollHeight - window.innerHeight;
+      const scrolled = (scrollTop / docHeight) * 100;
+      setScrollProgress(scrolled);
     };
 
-    if (id) fetchTemplate();
-  }, [id, user]);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+
+useEffect(() => {
+  const fetchTemplate = async () => {
+    setLoading(true);
+    try {
+      const viewerId = user?.id || "";
+      const viewerEmail = user?.email || "";
+
+      // Pass both viewer ID and email to API
+      const queryParams = new URLSearchParams();
+      
+      if (viewerId) queryParams.append("viewer_profile_id", viewerId);
+      if (viewerEmail) queryParams.append("viewer_email", viewerEmail);
+
+      const res = await fetch(`/api/template/${id}?${queryParams.toString()}`);
+
+      if (res.status === 403) {
+        setHasAccess(false);
+        setLoading(false);
+        return;
+      }
+
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error);
+
+      const tplData = data.data; // API now returns template + owner + sharedProfiles
+
+      if (!tplData || !tplData.template) {
+        setTemplate(null);
+        setHasAccess(false);
+        return;
+      }
+
+      const { template, profile, sharedProfiles = [] } = tplData;
+
+      // Set template state including sharedProfiles
+      setTemplate({
+        ...template,
+        user: {
+          username: profile?.username || "Unknown",
+          avatar_url: profile?.pic || "",
+        },
+        blocks: template.template_code_blocks || [],
+        isPublic: template.visibility === "public",
+        sharedProfiles, // array of { username, pic, profile_id }
+      });
+
+      setFilteredBlocks(template.template_code_blocks || []);
+
+      // Access allowed if public, or if user owns it, or if user is in sharedProfiles
+      const isOwner = user && user.id === template.user_id;
+      const isShared = sharedProfiles.some(
+        (p) => p.profile_id === user?.id || p.email === viewerEmail
+      );
+
+      setHasAccess(template.visibility === "public" || isOwner || isShared);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load template", { transition: Bounce });
+      setHasAccess(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (id) fetchTemplate();
+}, [id, user]);
+
 
   // Search within code/desc
   useEffect(() => {
@@ -123,20 +160,7 @@ const [scrollProgress, setScrollProgress] = useState(0);
   }, [search, template]);
 
   // Theme styles
-  const styles = {
-    bgBase: isDark ? "bg-[#0B0B13]" : "bg-[#F6F6F8]",
-    textMain: isDark ? "text-white" : "text-gray-900",
-    textSecondary: isDark ? "text-gray-400" : "text-gray-700",
-    borderCard: isDark ? "border-gray-700" : "border-gray-200",
-    bgCard: isDark ? "bg-[#181825]" : "bg-white",
-    bgNavbar: isDark ? "bg-[#13131C]" : "bg-white",
-    bgSearch: isDark ? "bg-[#22223C]" : "bg-gray-100",
-    inputText: isDark ? "text-white" : "text-gray-900",
-    borderIndigo: isDark ? "border-indigo-500" : "border-indigo-600",
-    blockDesc: isDark ? "text-indigo-300" : "text-indigo-700",
-    preBg: isDark ? "bg-[#14141c]" : "bg-gray-900",
-    preText: "text-cyan-200",
-  };
+
 
   if (loading) {
     return (
@@ -167,17 +191,17 @@ const [scrollProgress, setScrollProgress] = useState(0);
     backdrop-blur-md z-30 transition-transform duration-300`}
         style={{ transform: navHidden ? "translateY(-100%)" : "translateY(0)" }}
       >
-{/* Scroll Progress Bar */}
-<div
-  className="fixed top-0 left-0 h-[3px] bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 z-50 transition-all"
-  style={{ width: `${scrollProgress}%` }}
-></div>
+        {/* Scroll Progress Bar */}
+        <div
+          className="fixed top-0 left-0 h-[3px] bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 z-50 transition-all"
+          style={{ width: `${scrollProgress}%` }}
+        ></div>
 
 
         {/* Back Arrow */}
         <button
           onClick={() => router.back()}
-          className={`mr-2 p-2 rounded ${isDark ? " hover:bg-gray-800 ":"hover:bg-gray-100"} `}
+          className={`mr-2 p-2 rounded ${isDark ? " hover:bg-gray-800 " : "hover:bg-gray-100"} `}
         >
           <ArrowLeft className={isDark ? "text-white" : "text-gray-800"} size={24} />
         </button>
@@ -200,7 +224,7 @@ const [scrollProgress, setScrollProgress] = useState(0);
         </div>
         {/* Dark mode button */}
         <button
-          className={`p-1 rounded-full  ${isDark ? "hover:bg-gray-800":"hover:bg-gray-100" }  transition`}
+          className={`p-1 rounded-full  ${isDark ? "hover:bg-gray-800" : "hover:bg-gray-100"}  transition`}
           onClick={() => dispatch(toggleDarkMode())}
           aria-label="Toggle dark mode"
         >
@@ -291,73 +315,73 @@ const [scrollProgress, setScrollProgress] = useState(0);
 
         {/* Code Blocks */}
         <div className="space-y-10 mt-8 px-2 md:px-0">
-        {filteredBlocks.map((block, idx) => (
-  <div
-    key={block.id || idx}
-    className={`rounded-xl border ${styles.borderCard} ${styles.bgCard} p-6 shadow-sm`}
-  >
-    {/* Description, if present */}
-    {block.description && (
-      <div className={`mb-4 text-md md:text-lg font-semibold break-words ${styles.blockDesc}`}>
-        {block.description}
-      </div>
-    )}
+          {filteredBlocks.map((block, idx) => (
+            <div
+              key={block.id || idx}
+              className={`rounded-xl border ${styles.borderCard} ${styles.bgCard} p-6 shadow-sm`}
+            >
+              {/* Description, if present */}
+              {block.description && (
+                <div className={`mb-4 text-md md:text-lg font-semibold break-words ${styles.blockDesc}`}>
+                  {block.description}
+                </div>
+              )}
 
-    {/* Language and AI badges */}
-    <div className="flex gap-2 mb-2 flex-wrap">
-      {block.language && (
-        <span className="bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-200 px-2 py-1 rounded text-xs font-semibold">
-          {block.language}
-        </span>
-      )}
-      {block.is_generated ? (
-        <span className="bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-200 px-2 py-1 rounded text-xs font-semibold">
-          AI Generated
-        </span>
-      ) : null}
-    </div>
+              {/* Language and AI badges */}
+              <div className="flex gap-2 mb-2 flex-wrap">
+                {block.language && (
+                  <span className="bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-200 px-2 py-1 rounded text-xs font-semibold">
+                    {block.language}
+                  </span>
+                )}
+                {block.is_generated ? (
+                  <span className="bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-200 px-2 py-1 rounded text-xs font-semibold">
+                    AI Generated
+                  </span>
+                ) : null}
+              </div>
 
-    {/* Original Code */}
-    {block.code && (
-      <div className="relative group mb-4">
-        <label className="block mb-1 text-xs font-bold text-gray-400 dark:text-gray-500">Original Code:</label>
-        <pre
-          className={`${styles.preBg} ${styles.preText} p-4 rounded-lg text-sm md:text-base overflow-x-auto`}
-          style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
-        >
-          {block.code}
-        </pre>
-        <button
-          className="absolute top-3 right-3 opacity-80 group-hover:opacity-100 bg-gray-700 dark:bg-gray-900 text-white p-2 rounded-lg hover:bg-indigo-600 dark:hover:bg-indigo-700 transition"
-          onClick={() => handleCopy(block.code)}
-          aria-label="Copy code"
-        >
-          <Copy size={16} />
-        </button>
-      </div>
-    )}
+              {/* Original Code */}
+              {block.code && (
+                <div className="relative group mb-4">
+                  <label className="block mb-1 text-xs font-bold text-gray-400 dark:text-gray-500">Original Code:</label>
+                  <pre
+                    className={`${styles.preBg} ${styles.preText} p-4 rounded-lg text-sm md:text-base overflow-x-auto`}
+                    style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
+                  >
+                    {block.code}
+                  </pre>
+                  <button
+                    className="absolute top-3 right-3 opacity-80 group-hover:opacity-100 bg-gray-700 dark:bg-gray-900 text-white p-2 rounded-lg hover:bg-indigo-600 dark:hover:bg-indigo-700 transition"
+                    onClick={() => handleCopy(block.code)}
+                    aria-label="Copy code"
+                  >
+                    <Copy size={16} />
+                  </button>
+                </div>
+              )}
 
-    {/* Corrected Code */}
-    {block.corrected_code && (
-      <div className="relative group">
-        <label className="block mb-1 text-xs font-bold text-green-400 dark:text-green-300">Corrected Code:</label>
-        <pre
-          className={`${styles.preBg} ${styles.preText} p-4 rounded-lg text-sm md:text-base overflow-x-auto border border-green-500 dark:border-green-700`}
-          style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
-        >
-          {block.corrected_code}
-        </pre>
-        <button
-          className="absolute top-3 right-3 opacity-80 group-hover:opacity-100 bg-gray-700 dark:bg-gray-900 text-white p-2 rounded-lg hover:bg-green-600 dark:hover:bg-green-700 transition"
-          onClick={() => handleCopy(block.corrected_code)}
-          aria-label="Copy corrected code"
-        >
-          <Copy size={16} />
-        </button>
-      </div>
-    )}
-  </div>
-))}
+              {/* Corrected Code */}
+              {block.corrected_code && (
+                <div className="relative group">
+                  <label className="block mb-1 text-xs font-bold text-green-400 dark:text-green-300">Corrected Code:</label>
+                  <pre
+                    className={`${styles.preBg} ${styles.preText} p-4 rounded-lg text-sm md:text-base overflow-x-auto border border-green-500 dark:border-green-700`}
+                    style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
+                  >
+                    {block.corrected_code}
+                  </pre>
+                  <button
+                    className="absolute top-3 right-3 opacity-80 group-hover:opacity-100 bg-gray-700 dark:bg-gray-900 text-white p-2 rounded-lg hover:bg-green-600 dark:hover:bg-green-700 transition"
+                    onClick={() => handleCopy(block.corrected_code)}
+                    aria-label="Copy corrected code"
+                  >
+                    <Copy size={16} />
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       </div>
 

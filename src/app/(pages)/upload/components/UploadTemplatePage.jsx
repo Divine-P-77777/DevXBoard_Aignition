@@ -24,6 +24,7 @@ export default function UploadTemplatePage({ initialData, onSuccess, onCancel })
         descLoading,
         descPrev,
         loading,
+        sharedEmails,
 
         // setters/handlers
         setImage,
@@ -49,6 +50,7 @@ export default function UploadTemplatePage({ initialData, onSuccess, onCancel })
         addCodeBlock,
         handleSubmit,
         confirmSubmit,
+        setSharedEmails
     } = useTemplateForm(initialData, onSuccess, onCancel);
 
     if (showPreview) {
@@ -163,11 +165,13 @@ export default function UploadTemplatePage({ initialData, onSuccess, onCancel })
                     />
 
                     {/* Visibility */}
-                    <VisibilitySection
-                        visibility={visibility}
-                        setVisibility={setVisibility}
-                        isDarkMode={isDarkMode}
-                    />
+          <VisibilitySection
+  visibility={visibility}
+  setVisibility={setVisibility}
+  isDarkMode={isDarkMode}
+  sharedEmails={sharedEmails}
+  setSharedEmails={setSharedEmails}
+/>
 
                     {/* Code Blocks */}
                     <CodeBlocksSection

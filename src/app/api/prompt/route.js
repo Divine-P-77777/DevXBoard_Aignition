@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import OpenAI from "openai";
 
 const endpoint = "https://models.github.ai/inference";
-const githubToken = process.env.GITHUB_TOKEN_FINE; // Set this in your environment
+const githubToken = process.env.GITHUB_TOKEN_FINE; 
 
 const openai = new OpenAI({
   baseURL: endpoint,
