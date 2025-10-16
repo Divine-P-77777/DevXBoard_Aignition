@@ -5,30 +5,71 @@ import { useSelector } from "react-redux";
 import clsx from "clsx";
 import { getFaviconFromUrl } from "@/utils/getFaviconFromUrl";
 import { ExternalLink, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import supabase from "@/libs/supabase/client";
 import { toast } from "react-toastify";
 import ConfirmPopup from "@/components/ui/Popup";
+import { useAuth } from "@/hooks/useAuth";
 
 const UrlCard = ({ card }) => {
   const isDark = useSelector((state) => state.theme.isDarkMode);
-  const isValidUrl = typeof card?.url === "string" && card.url.trim() !== "";
   const [faviconError, setFaviconError] = useState(false);
   const [visible, setVisible] = useState(true);
   const [showConfirm, setShowConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
+  const { user } = useAuth();
 
-  // 🗑️ Handle delete with confirmation
+  const isValidUrl = typeof card?.url === "string" && card.url.trim() !== "";
+
+  // ✅ Check ownership dynamically (card might come with card.card_id or user_id)
+  useEffect(() => {
+    const checkOwner = async () => {
+      if (!user) return;
+
+      try {
+        // If card already has user_id (e.g., from joined data)
+        if (card.user_id && user.id === card.user_id) {
+          setIsOwner(true);
+          return;
+        }
+
+        // Otherwise fetch the parent card's owner
+        if (card.card_id) {
+          const { data, error } = await supabase
+            .from("card")
+            .select("user_id")
+            .eq("id", card.card_id)
+            .single();
+
+          if (!error && data?.user_id === user.id) {
+            setIsOwner(true);
+          }
+        }
+      } catch (err) {
+        console.error("Error checking ownership:", err);
+      }
+    };
+
+    checkOwner();
+  }, [user, card]);
+
+  // 🗑️ Handle delete with confirmation (only if owner)
   const handleDeleteUrl = async () => {
+    if (!isOwner) {
+      toast.error("You are not allowed to delete this URL.");
+      return;
+    }
+
     try {
       setDeleting(true);
       setShowConfirm(false);
+
       const { error } = await supabase.from("url_store").delete().eq("id", card.id);
       if (error) throw error;
 
       toast.success("URL deleted successfully!");
-      // Instantly hide from UI
-      setVisible(false);
+      setVisible(false); // Instantly remove from UI
     } catch (err) {
       console.error("Failed to delete URL:", err);
       toast.error("Failed to delete URL!");
@@ -107,19 +148,22 @@ const UrlCard = ({ card }) => {
             </span>
           )}
 
-          <button
-            onClick={() => setShowConfirm(true)}
-            disabled={deleting}
-            title="Delete URL"
-            className={clsx(
-              "transition hover:scale-110 disabled:opacity-50",
-              isDark
-                ? "text-red-300 hover:text-red-200"
-                : "text-black hover:text-pink-900 font-bold"
-            )}
-          >
-            <Trash2 size={20} />
-          </button>
+          {/* 🗑️ Show Delete Only if Owner */}
+          {isOwner && (
+            <button
+              onClick={() => setShowConfirm(true)}
+              disabled={deleting}
+              title="Delete URL"
+              className={clsx(
+                "transition hover:scale-110 disabled:opacity-50",
+                isDark
+                  ? "text-red-300 hover:text-red-200"
+                  : "text-black hover:text-pink-900 font-bold"
+              )}
+            >
+              <Trash2 size={20} />
+            </button>
+          )}
         </div>
       </div>
     </>

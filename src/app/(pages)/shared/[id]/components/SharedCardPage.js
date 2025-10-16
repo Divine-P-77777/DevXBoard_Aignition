@@ -9,10 +9,14 @@ import { useSelector } from "react-redux";
 import GlobalLoader from "@/components/ui/GlobalLoader";
 import UrlCard from "@/app/(pages)/url-store/components/UrlCard";
 import { useParams, useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
+
 
 
 const SharedCardPage = () => {
     const { id } = useParams();
+    const { user } = useAuth();
+
   
   const [card, setCard] = useState(null);
   const [owner, setOwner] = useState(null);
