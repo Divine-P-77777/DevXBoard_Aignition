@@ -12,7 +12,6 @@ import { toggleDarkMode } from "@/store/themeSlice";
 import { useAuth } from "@/hooks/useAuth";
 import useScrollDirection from "@/hooks/useScrollDirection";
 
-// Helper to copy code and show toast
 const handleCopy = async (code) => {
   try {
     await navigator.clipboard.writeText(code);

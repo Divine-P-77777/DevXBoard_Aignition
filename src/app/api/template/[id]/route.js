@@ -5,16 +5,19 @@ export async function GET(req, { params }) {
   const { id } = await params;
   const searchParams = req.nextUrl.searchParams;
   const viewerProfileId = searchParams.get("viewer_profile_id");
-  const viewerEmail = searchParams.get("viewer_email");
+  let viewerUsername = searchParams.get("viewer_username"); // optional
 
   if (!id) {
-    return NextResponse.json({ success: false, error: "Template ID is required" }, { status: 400 });
+    return NextResponse.json(
+      { success: false, error: "Template ID is required" },
+      { status: 400 }
+    );
   }
 
   try {
     const supabase = supabaseServer();
 
-    // 1️⃣ Fetch template and code blocks
+    // 1️⃣ Fetch the template + code blocks
     const { data: template, error: templateError } = await supabase
       .from("templates")
       .select("*, template_code_blocks(*)")
@@ -28,21 +31,34 @@ export async function GET(req, { params }) {
       );
     }
 
-    // 2️⃣ Check visibility + access
+    // 2️⃣ Resolve username from profiles if not provided
+    if (!viewerUsername && viewerProfileId) {
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("username")
+        .eq("id", viewerProfileId)
+        .maybeSingle();
+
+      if (profileData?.username) {
+        viewerUsername = profileData.username;
+      }
+    }
+
+    // 3️⃣ Access control logic
     let hasAccess = false;
 
     if (template.visibility === "public") {
       hasAccess = true;
     } else if (template.user_id === viewerProfileId) {
-      // Owner access
+      // Owner
       hasAccess = true;
-    } else if (viewerEmail) {
-      // Shared email access
+    } else if (viewerUsername) {
+      // Check if username has been shared access
       const { data: shared } = await supabase
         .from("template_shares")
         .select("id")
         .eq("template_id", id)
-        .eq("shared_with_email", viewerEmail)
+        .ilike("shared_with_username", viewerUsername)
         .maybeSingle();
 
       if (shared) hasAccess = true;
@@ -55,31 +71,36 @@ export async function GET(req, { params }) {
       );
     }
 
-    // 3️⃣ Fetch template owner profile
+    // 4️⃣ Fetch template owner profile
     const { data: profile } = await supabase
       .from("profiles")
       .select("username, pic")
       .eq("id", template.user_id)
       .single();
 
-    // 4️⃣ Fetch all shared profiles for this template
+    // 5️⃣ Fetch shared usernames and their profiles
     const { data: shares } = await supabase
       .from("template_shares")
-      .select("shared_with_email")
+      .select("shared_with_username")
       .eq("template_id", id);
 
-    // 5️⃣ Get profile info for each shared email
     let sharedProfiles = [];
     if (shares?.length > 0) {
-      const emails = shares.map((s) => s.shared_with_email);
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("id, username, pic, email")
-        .in("email", emails);
-      sharedProfiles = profiles || [];
+      const usernames = shares
+        .map((s) => s.shared_with_username)
+        .filter(Boolean);
+
+      if (usernames.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, username, pic, email")
+          .in("username", usernames);
+
+        sharedProfiles = profiles || [];
+      }
     }
 
-    // ✅ 6️⃣ Return full data structure your frontend expects
+    // ✅ 6️⃣ Return final payload
     return NextResponse.json(
       {
         success: true,
@@ -93,6 +114,9 @@ export async function GET(req, { params }) {
     );
   } catch (err) {
     console.error("API /template/[id] error:", err);
-    return NextResponse.json({ success: false, error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }

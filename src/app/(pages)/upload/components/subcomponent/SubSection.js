@@ -125,6 +125,10 @@ export function VisibilitySection({
           <p className="text-sm text-gray-500">
             Search usernames to grant private access:
           </p>
+          <p className={`text-sm ${isDarkMode ? "text-cyan-500" : "text-cyan-900"} `}>
+            Note : In private mode, If you don't add any usernames, only you will
+            have access.
+          </p>
 
           <div className="relative" ref={dropdownRef}>
             <input
@@ -161,7 +165,7 @@ export function VisibilitySection({
                     <div
                       key={u.id}
                       onClick={() => handleAddUser(u.username)}
-                      className={`flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 ${
+                      className={`flex items-center gap-2 px-3 py-2 cursor-pointer  ${isDarkMode ?"hover:bg-gray-100 ":"hover:bg-gray-800 "}  ${
                         sharedUsernames.includes(u.username)
                           ? "opacity-50 pointer-events-none"
                           : ""
@@ -189,7 +193,7 @@ export function VisibilitySection({
             {sharedUsernames.map((username) => (
               <span
                 key={username}
-                className="px-2 py-1 text-xs rounded-full bg-gray-200 dark:bg-gray-800 flex items-center gap-1"
+                className={`px-2 py-1 text-sm rounded-full ${isDarkMode ? "bg-gray-800" : "bg-gray-200"} flex items-center gap-1 border-purple-500 border`}
               >
                 {username}
                 <button
