@@ -120,3 +120,61 @@ export async function GET(req, { params }) {
     );
   }
 }
+
+
+export async function DELETE(req, { params }) {
+  const { id } = await params;
+
+  if (!id) {
+    return NextResponse.json(
+      { success: false, error: "Template ID is required" },
+      { status: 400 }
+    );
+  }
+
+  try {
+    const supabase = supabaseServer();
+
+    // 1️⃣ Delete related template_code_blocks
+    const { error: blockError } = await supabase
+      .from("template_code_blocks")
+      .delete()
+      .eq("template_id", id);
+
+    if (blockError) {
+      console.error("Error deleting code blocks:", blockError);
+    }
+
+    // 2️⃣ Delete shares (if any)
+    const { error: shareError } = await supabase
+      .from("template_shares")
+      .delete()
+      .eq("template_id", id);
+
+    if (shareError) {
+      console.error("Error deleting shares:", shareError);
+    }
+
+    // 3️⃣ Delete the template itself
+    const { error: templateError } = await supabase
+      .from("templates")
+      .delete()
+      .eq("id", id);
+
+    if (templateError) {
+      console.error("Error deleting template:", templateError);
+      return NextResponse.json(
+        { success: false, error: templateError.message },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ success: true, message: "Template deleted successfully" });
+  } catch (err) {
+    console.error("DELETE /template/[id] error:", err);
+    return NextResponse.json(
+      { success: false, error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
