@@ -1,7 +1,7 @@
 "use client";
 
-import { Sparkles, Loader2, Undo2, Globe, Lock,UserPlus } from "lucide-react";
-import Toggle from "../Toggle";
+import { Sparkles, Loader2, Undo2, Globe, Lock } from "lucide-react";
+
 import CodeBlockCell from "../CodeBlockItem";
 import {useState,useEffect , useRef} from "react"
 
@@ -11,8 +11,8 @@ export function VisibilitySection({
   visibility,
   setVisibility,
   isDarkMode,
-  sharedEmails,
-  setSharedEmails,
+  sharedUsernames,
+  setSharedUsernames,
 }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
@@ -59,8 +59,8 @@ export function VisibilitySection({
   }, []);
 
   const handleAddUser = (username) => {
-    if (!sharedEmails.includes(username)) {
-      setSharedEmails([...sharedEmails, username]);
+    if (!sharedUsernames.includes(username)) {
+      setSharedUsernames([...sharedUsernames, username]);
       setQuery("");
       setResults([]);
       setShowDropdown(false);
@@ -74,7 +74,7 @@ export function VisibilitySection({
   };
 
   const handleRemove = (username) => {
-    setSharedEmails(sharedEmails.filter((u) => u !== username));
+    setSharedUsernames(sharedUsernames.filter((u) => u !== username));
   };
 
   return (
@@ -162,7 +162,7 @@ export function VisibilitySection({
                       key={u.id}
                       onClick={() => handleAddUser(u.username)}
                       className={`flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 ${
-                        sharedEmails.includes(u.username)
+                        sharedUsernames.includes(u.username)
                           ? "opacity-50 pointer-events-none"
                           : ""
                       }`}
@@ -186,7 +186,7 @@ export function VisibilitySection({
 
           {/* Added users */}
           <div className="flex flex-wrap gap-2 mt-2">
-            {sharedEmails.map((username) => (
+            {sharedUsernames.map((username) => (
               <span
                 key={username}
                 className="px-2 py-1 text-xs rounded-full bg-gray-200 dark:bg-gray-800 flex items-center gap-1"
@@ -310,9 +310,6 @@ export function TitleSection({
     </div>
   );
 }
-
-/* ---------------- Visibility Section ---------------- */
-
 
 
 

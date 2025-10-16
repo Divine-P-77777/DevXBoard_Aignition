@@ -29,19 +29,19 @@ useCheckProfileComplete();
     // eslint-disable-next-line
   }, [user]);
 
-  const normalizeSharedEmails = (val) => {
-    if (!val) return [];
-    if (Array.isArray(val)) return val.filter(Boolean);
-    if (typeof val === "string") {
-      // Accept both JSON-stringified arrays and comma-separated lists
-      try {
-        const parsed = JSON.parse(val);
-        if (Array.isArray(parsed)) return parsed.filter(Boolean);
-      } catch {}
-      return val.split(",").map((s) => s.trim()).filter(Boolean);
-    }
-    return [];
-  };
+  const normalizeSharedUsernames = (val) => {
+  if (!val) return [];
+  if (Array.isArray(val)) return val.filter(Boolean);
+  if (typeof val === "string") {
+    try {
+      const parsed = JSON.parse(val);
+      if (Array.isArray(parsed)) return parsed.filter(Boolean);
+    } catch {}
+    return val.split(",").map((s) => s.trim()).filter(Boolean);
+  }
+  return [];
+};
+
 
   const fetchTemplates = async () => {
     setLoading(true);
@@ -50,7 +50,7 @@ useCheckProfileComplete();
       const data = await res.json();
       const mapped = (data.templates || []).map((t) => ({
         ...t,
-        sharedEmails: normalizeSharedEmails(t.sharedEmails),
+sharedUsernames: normalizeSharedUsernames(t.sharedUsernames),
       }));
       setTemplates(mapped);
     } catch (err) {
@@ -85,7 +85,7 @@ useCheckProfileComplete();
           visibility: newVisibility,
           cover_image: tpl.cover_image,
           blocks: tpl.blocks,
-          sharedEmails: tpl.sharedEmails || [],
+  sharedUsernames: tpl.sharedUsernames || [],
         }),
       });
       // Optionally, read returned template data to keep canonical state
@@ -96,8 +96,8 @@ useCheckProfileComplete();
             ? {
                 ...t,
                 visibility: newVisibility,
-                // ensure sharedEmails remains normalized
-                sharedEmails: normalizeSharedEmails(json?.data?.sharedEmails ?? t.sharedEmails),
+                // ensure sharedUsernames remains normalized
+                sharedUsernames: normalizeSharedUsernames(json?.data?.sharedUsernames ?? t.sharedUsernames),
               }
             : t
         )
@@ -183,17 +183,18 @@ useCheckProfileComplete();
         </Link>
       </td>
 <td className="py-2 px-3 text-sm text-gray-500 dark:text-gray-400">
-  {tpl.sharedEmails && tpl.sharedEmails.length > 0 ? (
+  {tpl.sharedUsernames && tpl.sharedUsernames.length > 0 ? (
+
     <div className="flex items-center gap-1">
       <span
         className="px-2 py-1 rounded bg-gray-200 dark:bg-gray-700 text-xs truncate max-w-[160px]"
-        title={tpl.sharedEmails[0]}
+        title={tpl.sharedUsernames[0]}
       >
-        {tpl.sharedEmails[0]}
+        {tpl.sharedUsernames[0]}
       </span>
-      {tpl.sharedEmails.length > 1 && (
+      {tpl.sharedUsernames.length > 1 && (
         <span className="text-xs text-gray-400">
-          +{tpl.sharedEmails.length - 1}
+          +{tpl.sharedUsernames.length - 1}
         </span>
       )}
     </div>

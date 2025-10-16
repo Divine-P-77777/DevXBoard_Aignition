@@ -4,7 +4,7 @@ import { supabaseServer } from "@/libs/supabase/server";
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { template_id, user_id, title, subtitle, visibility, cover_image, blocks, sharedEmails = [] } = body;
+const { template_id, user_id, title, subtitle, visibility, cover_image, blocks, sharedUsernames = [] } = body;
 
     if (!title || !cover_image || !blocks || blocks.length === 0) {
       return NextResponse.json(
@@ -102,25 +102,26 @@ export async function POST(req) {
     }
 
     // --- 🧩 Handle Private Sharing ---
-    await supabase.from("template_shares").delete().eq("template_id", template.id);
+// --- 🧩 Handle Private Sharing (USERNAME-BASED) ---
+await supabase.from("template_shares").delete().eq("template_id", template.id);
 
-    if (visibility === "private" && sharedEmails.length > 0) {
-      const shareRecords = sharedEmails.map((email) => ({
-        template_id: template.id,
-        shared_with_email: email,
-      }));
+if (visibility === "private" && Array.isArray(sharedUsernames) && sharedUsernames.length > 0) {
+  const shareRecords = sharedUsernames.map((username) => ({
+    template_id: template.id,
+    shared_with_username: username,
+  }));
 
-      const { error: shareErr } = await supabase
-        .from("template_shares")
-        .insert(shareRecords);
+  const { error: shareErr } = await supabase
+    .from("template_shares")
+    .insert(shareRecords);
 
-      if (shareErr) {
-        return NextResponse.json(
-          { success: false, error: shareErr.message },
-          { status: 500 }
-        );
-      }
-    }
+  if (shareErr) {
+    return NextResponse.json(
+      { success: false, error: shareErr.message },
+      { status: 500 }
+    );
+  }
+}
 
     const { data: allBlocks } = await supabase
       .from("template_code_blocks")
@@ -141,6 +142,7 @@ export async function POST(req) {
 }
 
 
+
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
@@ -155,7 +157,7 @@ export async function GET(req) {
 
     const supabase = supabaseServer();
 
-    // Fetch all templates for this user, including blocks
+    // 🔹 Fetch all templates created by this user
     const { data: templates, error } = await supabase
       .from("templates")
       .select("*, template_code_blocks(*)")
@@ -169,13 +171,15 @@ export async function GET(req) {
       );
     }
 
-    // Fetch all shares for these templates
+    // 🔹 Collect template IDs
     const templateIds = (templates || []).map((tpl) => tpl.id);
     let shares = [];
+
     if (templateIds.length > 0) {
+      // 🔹 Fetch all private share records (now by username)
       const { data: shareData, error: shareErr } = await supabase
         .from("template_shares")
-        .select("template_id, shared_with_email")
+        .select("template_id, shared_with_username")
         .in("template_id", templateIds);
 
       if (shareErr) {
@@ -184,17 +188,18 @@ export async function GET(req) {
           { status: 500 }
         );
       }
+
       shares = shareData || [];
     }
 
-    // Group shares by template_id
+    // 🔹 Group shared usernames by template_id
     const sharesByTemplate = shares.reduce((acc, s) => {
       if (!acc[s.template_id]) acc[s.template_id] = [];
-      acc[s.template_id].push(s.shared_with_email);
+      acc[s.template_id].push(s.shared_with_username);
       return acc;
     }, {});
 
-    // Format templates
+    // 🔹 Format final templates response
     const formatted = (templates || []).map((tpl) => ({
       id: tpl.id,
       title: tpl.title,
@@ -204,10 +209,13 @@ export async function GET(req) {
       created_at: tpl.created_at,
       updated_at: tpl.updated_at,
       blocks: tpl.template_code_blocks || [],
-      sharedEmails: sharesByTemplate[tpl.id] || [],  // 🔑 now included
+      sharedUsernames: sharesByTemplate[tpl.id] || [], // ✅ consistent field
     }));
 
-    return NextResponse.json({ success: true, templates: formatted }, { status: 200 });
+    return NextResponse.json(
+      { success: true, templates: formatted },
+      { status: 200 }
+    );
   } catch (err) {
     console.error("API /template GET error:", err);
     return NextResponse.json(
