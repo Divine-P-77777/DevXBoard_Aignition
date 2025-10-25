@@ -1,25 +1,33 @@
+// /app/install/page.jsx
 "use client";
 
 import { useState, useEffect } from "react";
 import clsx from "clsx";
 import Image from "next/image";
 import { useSelector } from "react-redux";
+import { Loader2 } from "lucide-react";
 
 export default function InstallPage() {
   const isDarkMode = useSelector((state) => state.theme.isDarkMode);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isWebAppInstalled, setIsWebAppInstalled] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Detect if app is installed and setup PWA prompt
+  // Detect if installed + capture PWA install prompt globally
   useEffect(() => {
     const isStandalone =
       window.matchMedia("(display-mode: standalone)").matches ||
-      (window.navigator).standalone;
-
+      window.navigator.standalone;
     setIsWebAppInstalled(isStandalone);
 
+    // Restore cached prompt if existed
+    if (window.deferredPWAEvent) {
+      setDeferredPrompt(window.deferredPWAEvent);
+    }
+
     const beforeInstallPromptHandler = (e) => {
-      e.preventDefault(); // Prevent automatic prompt
+      e.preventDefault();
+      window.deferredPWAEvent = e; // cache globally
       setDeferredPrompt(e);
       console.log("✅ beforeinstallprompt event captured");
     };
@@ -37,16 +45,22 @@ export default function InstallPage() {
       return;
     }
 
-    deferredPrompt.prompt();
-    const choice = await deferredPrompt.userChoice;
+    try {
+      setIsLoading(true);
+      deferredPrompt.prompt();
 
-    if (choice.outcome === "accepted") {
-      console.log("✅ PWA installed by user");
-      setIsWebAppInstalled(true);
-    } else {
-      console.log("❌ PWA install dismissed");
+      const choice = await deferredPrompt.userChoice;
+      if (choice.outcome === "accepted") {
+        console.log("✅ PWA installed by user");
+        setIsWebAppInstalled(true);
+      } else {
+        console.log("❌ PWA install dismissed");
+      }
+    } finally {
+      setDeferredPrompt(null);
+      window.deferredPWAEvent = null;
+      setIsLoading(false);
     }
-    setDeferredPrompt(null);
   };
 
   const handleUninstallPWA = () => {
@@ -102,20 +116,29 @@ export default function InstallPage() {
             <div className="px-4 mt-5 w-full flex justify-center">
               <button
                 onClick={handleInstallPWA}
-                disabled={!deferredPrompt}
+                disabled={!deferredPrompt || isLoading}
                 className={clsx(
-                  "flex items-center gap-2 py-2 px-6 rounded-lg font-medium transition-colors",
-                  deferredPrompt
+                  "flex items-center justify-center gap-2 py-2 px-6 rounded-lg font-medium transition-colors min-w-[160px]",
+                  deferredPrompt && !isLoading
                     ? "bg-purple-600 text-white hover:bg-purple-500 cursor-pointer"
                     : "bg-gray-400 text-white cursor-not-allowed opacity-50"
                 )}
               >
-                <span>Install App</span>
-                <img
-                  src={isDarkMode ? "/install.png" : "/install2.png"}
-                  alt="Download Icon"
-                  className="w-6 h-6"
-                />
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>Installing...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Install App</span>
+                    <img
+                      src={isDarkMode ? "/install.png" : "/install2.png"}
+                      alt="Download Icon"
+                      className="w-6 h-6"
+                    />
+                  </>
+                )}
               </button>
             </div>
           ) : (
@@ -133,8 +156,8 @@ export default function InstallPage() {
 
       {!isWebAppInstalled && (
         <p className="mt-8 text-sm opacity-70 text-center max-w-md">
-          Tip: If the install button doesn’t show a popup, ensure you’re using Chrome on
-          Android and your site is served over HTTPS.
+          Tip: If the install button doesn’t show, ensure you’re using Chrome on Android,
+          your site is HTTPS, and not already installed.
         </p>
       )}
     </div>

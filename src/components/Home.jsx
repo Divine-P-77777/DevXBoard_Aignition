@@ -78,9 +78,16 @@ export default function Home() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h1 className="font-extrabold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-500 text-[clamp(2rem,5vw,4rem)] leading-tight">
-              AI Copilot for Developers & Creators
-            </h1>
+<h1
+  className="font-extrabold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-purple-500 via-blue-400 to-pink-300 text-[clamp(2rem,5vw,4rem)] leading-tight"
+  style={{
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+  }}
+>
+  AI Copilot for Developers & Creators
+</h1>
+
             <p className="text-base sm:text-lg md:text-xl mb-8 opacity-80 leading-relaxed max-w-xl">
               Build multiple cards, auto-generate metadata, share code, and explore public templates — all automated for you.
             </p>
