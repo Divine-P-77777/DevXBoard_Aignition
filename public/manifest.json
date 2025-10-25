@@ -6,7 +6,7 @@
   "orientation": "portrait",
   "lang": "en-IN",
   "background_color": "#000000",
-  "theme_color": "#ff6f00",
+  "theme_color": "#7e22ce",      
   "description": "DevXBoard is a developer-centric platform to create, share, and manage AI-powered link cards, templates, and projects.",
   "scope": "/",
   "icons": [
