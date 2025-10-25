@@ -128,7 +128,7 @@ export default function UploadTemplatePage({ initialData, onSuccess, onCancel })
               <button
                 type="button"
                 onClick={onCancel}
-                className="ml-4 px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-gray-800"
+                className={` ml-4 px-4 py-2 rounded ${isDarkMode ? " bg-purple-950 text-white" :"bg-pink-200 text-black"} `}
               >
                 Cancel
               </button>

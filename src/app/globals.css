@@ -1,27 +1,39 @@
 @import "tailwindcss";
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fira+Code:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap');
+
+/* 
+💡 Typography Setup for DeVXBoard
+   - Headings → Poppins (modern, bold)
+   - Body text → Inter (clean, readable)
+   - Code/technical elements → Fira Code (developer look)
+*/
 
 :root {
   --font-heading: 'Poppins', sans-serif;
   --font-body: 'Inter', sans-serif;
+  --font-code: 'Fira Code', monospace;
 }
 
+/* Base font family */
 body {
   font-family: var(--font-body);
-  background-color: #0b0b0f;
-  color: #eaeaea;
-  line-height: 1.6;
 }
 
+/* Headings: strong, modern sans-serif */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
   font-weight: 600;
-  color: #ffffff;
 }
 
-p, span, a, li, input, button {
+/* Paragraphs and inline text */
+p, span, a, li, input, button, label {
   font-family: var(--font-body);
   font-weight: 400;
-  color: #d1d1d1;
+}
+
+/* Code and preformatted text */
+code, pre, kbd, samp {
+  font-family: var(--font-code);
+  font-weight: 500;
 }
