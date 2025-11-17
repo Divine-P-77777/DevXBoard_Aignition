@@ -10,10 +10,15 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import GlobalLoaderWrapper from '@/components/ui/GlobalLoader';
 import useLenis from "@/hooks/useLenisScroll";
-
+import ServerDown from "@/components/ui/ServerDown";
+import { useServerStatus } from "@/hooks/useServerStatus";
 
 export default function ReduxProvider({ children }) {
   const pathname = usePathname();
+    const serverDown = useServerStatus();
+      if (serverDown) return <ServerDown />;
+
+
   const hideNavFoot = pathname.startsWith('/template/view/');
     useLenis();
   return (
