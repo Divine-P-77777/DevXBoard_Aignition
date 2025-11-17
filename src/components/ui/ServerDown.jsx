@@ -33,7 +33,7 @@ const ServerDownPage = () => {
         {/* GIF */}
         <div className="w-full flex justify-center mb-6">
           <Image
-            src="/server-down.gif"
+            src="/favicon.png"
             alt="Server Down"
             width={240}
             height={240}
@@ -43,7 +43,7 @@ const ServerDownPage = () => {
 
         {/* Title */}
         <h1 className="text-3xl font-extrabold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-blue-400">
-          Server Temporarily Down 😔
+          Server Temporarily Down 
         </h1>
 
         {/* Message */}

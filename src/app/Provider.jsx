@@ -15,24 +15,28 @@ import { useServerStatus } from "@/hooks/useServerStatus";
 
 export default function ReduxProvider({ children }) {
   const pathname = usePathname();
-    const serverDown = useServerStatus();
-      if (serverDown) return <ServerDown />;
-
+  const serverDown = useServerStatus();  
+  useLenis();                           
 
   const hideNavFoot = pathname.startsWith('/template/view/');
-    useLenis();
+
   return (
     <Provider store={store}>
-      {/* PersistGate ensures store is hydrated */}
       <PersistGate loading={<GlobalLoader />} persistor={persistor}>
         <AuthProvider>
-       {!hideNavFoot && <Navbar />}
-          <ToastContainer />
+          {/* render warning UI while keeping hooks stable */}
+          {serverDown ? (
+            <ServerDown />
+          ) : (
+            <>
+              {!hideNavFoot && <Navbar />}
+              <ToastContainer />
               <GlobalLoaderWrapper>
-          {children}
-          </GlobalLoaderWrapper>
-           {!hideNavFoot && <Footer />}
-
+                {children}
+              </GlobalLoaderWrapper>
+              {!hideNavFoot && <Footer />}
+            </>
+          )}
         </AuthProvider>
       </PersistGate>
     </Provider>
